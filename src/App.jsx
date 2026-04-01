@@ -438,7 +438,14 @@ function App() {
       {/* Footer / Contact Hybrid Section */}
       <section className="footer-section" id="footer">
         <div className="footer-globe-bg">
-          <img src="/logos/globe.png" alt="World Map Background" />
+          <video 
+            src="/logos/video.mp4" 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="background-video"
+          />
         </div>
         <div className="footer-content">
           <p className="have-idea">Have an Idea ?</p>
