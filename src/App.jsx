@@ -36,7 +36,127 @@ function App() {
   ];
 
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const [quoteIndex, setQuoteIndex] = React.useState(0);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
+  // Form State
+  const [formData, setFormData] = React.useState({
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    company: '',
+    purpose: ''
+  });
+  const [errors, setErrors] = React.useState({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitStatus, setSubmitStatus] = React.useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Special handling for phone to allow only digits and leading +
+    if (name === 'phone') {
+      const cleaned = value.replace(/(?!^\+)[^\d]/g, '');
+      setFormData(prev => ({ ...prev, [name]: cleaned }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    // Phone Validation logic
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone is required';
+    } else {
+      const digitsOnly = formData.phone.replace(/\+/g, '');
+      if (formData.phone.startsWith('+91')) {
+        const numberPart = formData.phone.substring(3);
+        if (numberPart.length !== 10) {
+          newErrors.phone = 'India number must be 10 digits';
+        }
+      } else if (digitsOnly.length < 10) {
+        newErrors.phone = 'Minimum 10 digits required';
+      }
+    }
+
+    if (!formData.location.trim()) newErrors.location = 'Location is required';
+    if (!formData.company.trim()) newErrors.company = 'Company is required';
+    if (!formData.purpose.trim()) newErrors.purpose = 'Purpose is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validate()) {
+      setIsSubmitting(true);
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setSubmitStatus('success');
+        setFormData({ name: '', email: '', phone: '', location: '', company: '', purpose: '' });
+        setTimeout(() => setSubmitStatus(null), 5000);
+      }, 1500);
+    }
+  };
+
+  // Quotes Data for the CTA section (4 items to match dots)
+  const quotes = [
+    {
+      id: 1,
+      text: "Great companies are not built by <strong>ideas</strong> alone, but by people who believe in turning those ideas into <strong>reality</strong>.",
+      author: "Hepsibah Catherine",
+      title: "Founder & CEO",
+      image: "/logos/mam.png",
+      layoutType: "photo-left"
+    },
+    {
+      id: 2,
+      text: "People think confidence comes from success. But honestly It's the other way around. Success comes from daring to be <strong>confident</strong> first.",
+      author: "Hepsibah Catherine",
+      title: "Founder & CEO",
+      image: "/logos/quote 1.png",
+      layoutType: "photo-right"
+    },
+    {
+      id: 3,
+      text: "Innovation is the difference between a leader and a follower. We lead with <strong>purpose</strong>.",
+      author: "Hepsibah Catherine",
+      title: "Founder & CEO",
+      image: "/logos/quote 2.png",
+      layoutType: "photo-left"
+    },
+    {
+      id: 4,
+      text: "Our mission is to create <strong>opportunities</strong> that empower communities and sustain the planet.",
+      author: "Hepsibah Catherine",
+      title: "Founder & CEO",
+      image: "/logos/quote 3.png",
+      layoutType: "photo-right"
+    }
+  ];
+
+  // Auto-play for quotes
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % quotes.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
 
   const nextSlide = () => {
     setActiveIndex((prev) => (prev + 1) % testimonials.length);
@@ -44,6 +164,10 @@ function App() {
 
   const prevSlide = () => {
     setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  const nextQuote = () => {
+    setQuoteIndex((prev) => (prev + 1) % quotes.length);
   };
 
   // Helper to determine position classes for cards
@@ -59,65 +183,75 @@ function App() {
       {/* Background patterns for Hero section */}
       <div className="bg-pattern" />
 
+
+
       {/* Header */}
       <header>
-        <button className={`menu-toggle ${isMenuOpen ? 'active' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <nav className={`nav-links ${isMenuOpen ? 'mobile-open' : ''}`}>
-          <a href="#about" onClick={() => setIsMenuOpen(false)}>ABOUT</a>
-          <a href="#partners" onClick={() => setIsMenuOpen(false)}>PARTNERS</a>
-          <a href="#testimonials" onClick={() => setIsMenuOpen(false)}>TESTIMONIALS</a>
-          <a href="#contact" onClick={() => setIsMenuOpen(false)}>CONTACT</a>
-          <a href="#contact" className="book-btn-mobile" onClick={() => setIsMenuOpen(false)}>Book Appointment</a>
-        </nav>
-        <div className="book-btn-wrapper">
-          <a href="#contact" className="book-btn">Book Appointment</a>
+        <div className="header-container">
+          <button className={`menu-toggle ${isMenuOpen ? 'active' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <nav className={`nav-links ${isMenuOpen ? 'mobile-open' : ''}`}>
+            <a href="#about" onClick={() => setIsMenuOpen(false)}>ABOUT</a>
+            <a href="#partners" onClick={() => setIsMenuOpen(false)}>FIRMS</a>
+            <a href="#testimonials" onClick={() => setIsMenuOpen(false)}>TESTIMONIALS</a>
+            <a href="#contact" onClick={() => setIsMenuOpen(false)}>CONTACT</a>
+            <a href="#contact" className="book-btn-mobile" onClick={() => setIsMenuOpen(false)}>Book Appointment</a>
+          </nav>
+          <div className="book-btn-wrapper">
+            <a href="#contact" className="book-btn">Book Appointment</a>
+          </div>
         </div>
       </header>
 
       {/* Hero Section */}
       <main className="hero">
-        <div className="hero-left">
-          <p className="hero-hello">Hello! I’m <span className="name">Hepsibah Catherine</span></p>
-          <h1 className="hero-title">Multipreneur<br />& Consultant</h1>
-          <p className="hero-quote">
-            “Building for <span className="highlight">people</span> and planet with purpose.”
-          </p>
-        </div>
-
-        <div className="hero-right">
-          <div className="hero-blue-arc"></div>
-          <div className="main-portrait">
-            <img src="/hero.png" alt="Hepsibah Catherine"
-              onError={(e) => {
-                e.target.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=776';
-              }}
-            />
+        <div className="hero-container">
+          <div className="hero-left">
+            <p className="hero-hello">Hello! I'm <span className="name">Hepsibah Catherine</span></p>
+            <h1 className="hero-title">Multipreneur<br />& Consultant</h1>
+            <p className="hero-quote">
+              “Building for <span className="highlight">people</span> and planet with purpose.”
+            </p>
           </div>
 
-          {/* Social Bar */}
+          <div className="hero-right">
+            <div className="hero-blue-arc"></div>
+            <div className="main-portrait">
+              <img src="/logos/mam.png" alt="Hepsibah Catherine"
+                onError={(e) => {
+                  e.target.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=776';
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Social Bar - moved outside hero-right so it can flow below portrait on mobile */}
           <div className="vertical-social-bar">
+            {/* Instagram */}
             <a href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2" target="_blank" rel="noreferrer" className="social-pill">
-              <svg width="22" height="22" fill="#E4405F" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
+              <img src="/icons/instagram.png" alt="Instagram" />
             </a>
+            {/* Email */}
             <a href="mailto:connect@manvian.com" className="social-pill">
-              <svg width="22" height="22" fill="#0072C6" viewBox="0 0 24 24"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 4.612l3.824 3.091l3.824-3.091 5.694 7.038h-19.035l5.693-7.038zm10.201-1.044l4.623-3.746v9.458l-4.623-5.712z" /></svg>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
             </a>
+            {/* WhatsApp */}
             <a href="https://wa.me/918778359643" target="_blank" rel="noreferrer" className="social-pill">
-              <svg width="22" height="22" fill="#25D366" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.407 3.481s3.48 5.226 3.48 8.408c-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.3 1.667zm5.422-3.772.348.207c1.469.873 3.15 1.335 4.873 1.336 5.176 0 9.39-4.214 9.392-9.391 0-2.507-.975-4.865-2.744-6.634s-4.126-2.744-6.632-2.744c-5.176 0-9.39 4.215-9.392 9.392 0 1.819.522 3.593 1.508 5.137l.228.356-.993 3.63 3.712-.977z" /></svg>
+              <img src="/icons/whatsapp.png" alt="WhatsApp" />
             </a>
+            {/* LinkedIn */}
             <a href="https://www.linkedin.com/in/hepsibah-catherine/" target="_blank" rel="noreferrer" className="social-pill">
-              <svg width="22" height="22" fill="#0077B5" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+              <span className="linkedin-in" style={{ fontSize: '24px' }}>in</span>
             </a>
           </div>
         </div>
       </main>
 
       {/* Stats Bar */}
-      <section className="stats-bar-navy">
+      <section className="stats-bar-navy" style={{ bottom: "90px" }}>
         <div className="stat-box-navy">
           <span className="sn-num">500+</span>
           <span className="sn-text">Successful Projects</span>
@@ -149,7 +283,7 @@ function App() {
           {/* Mission Card */}
           <div className="info-card">
             <div className="card-icon-wrapper">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-target"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+              <img src="/icons/mission.png" alt="Mission" />
             </div>
             <div className="card-content">
               <h3>Mission</h3>
@@ -161,19 +295,20 @@ function App() {
           {/* Vision Card */}
           <div className="info-card">
             <div className="card-icon-wrapper">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-lamp"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 1 7 7c0 2.32-1.28 4.35-3.19 5.39a1 1 0 0 0-.81 1.61v.5a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.5a1 1 0 0 0-.81-1.61A7 7 0 0 1 12 2z"></path></svg>
+              <img src="/icons/vision.png" alt="Vision" />
             </div>
             <div className="card-content">
               <h3>Vision</h3>
               <div className="card-separator"></div>
               <p>To build a future-ready organization that leads with purpose and inspires change. We aim to set new standards of excellence in everything we do.</p>
+
             </div>
           </div>
 
           {/* Values Card */}
           <div className="info-card">
             <div className="card-icon-wrapper">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-diamond"><path d="M6 19h12"></path><path d="M2 9L12 22L22 9L12 2Z"></path><path d="M12 2V22"></path><path d="M2 9H22"></path></svg>
+              <img src="/icons/values.png" alt="Values" />
             </div>
             <div className="card-content">
               <h3>Values</h3>
@@ -193,6 +328,23 @@ function App() {
           <div className="orbit-ring ring-3" />
           <div className="orbit-ring ring-4" />
 
+          {/* Background Stars */}
+          <div className="star star-s1"></div>
+          <div className="star star-s2"></div>
+          <div className="star star-s3"></div>
+          <div className="star star-s4"></div>
+          <div className="star star-s5"></div>
+          <div className="star star-s6"></div>
+          <div className="star star-s7"></div>
+          <div className="star star-s8"></div>
+          <div className="star star-s9"></div>
+          <div className="star star-s10"></div>
+          <div className="star star-s11"></div>
+          <div className="star star-s12"></div>
+          <div className="star star-s13"></div>
+          <div className="star star-s14"></div>
+          <div className="star star-s15"></div>
+
           {/* Animated Dots */}
           <div className="orbital-dot dot-1"></div>
           <div className="orbital-dot dot-1-alt"></div>
@@ -204,18 +356,19 @@ function App() {
           <div className="orbital-dot dot-4-alt"></div>
 
           {/* Glowing Center Logo (Main) */}
-          <a href="https://manvian.com/" target="_blank" rel="noreferrer" className="center-card">
-            <div className="card-logo-circle">
-              <img src="/logos/Manvian.png" alt="Manvian" />
-            </div>
-            <div className="card-text">
-              <h4>Manvian</h4>
-              <div className="open-link">
-                <span>Open Website</span>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M10 7h7v7"></path></svg>
+          <div className="partner-logo-pill logo-ellipse-30">
+            <a href="https://manvian.com/" target="_blank" rel="noreferrer" className="center-card">
+              <div className="logo-pill-inner">
+                <div className="pill-circle"><img src="/logos/Manvian.png" alt="Manvian" /></div>
+                <div className="pill-text">
+                  <span>Manvian</span>
+                  <div className="open-link">
+                    <span>Open Website →</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </a>
+            </a>
+          </div>
 
           {/* Partner Logos along orbits */}
           <div className="partner-logo-pill logo-ellipse-31">
@@ -224,8 +377,7 @@ function App() {
               <div className="pill-text">
                 <span>Topackz</span>
                 <div className="open-link">
-                  <span>Open Website</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M10 7h7v7"></path></svg>
+                  <span>Open Website →</span>
                 </div>
               </div>
             </div>
@@ -236,8 +388,7 @@ function App() {
               <div className="pill-text">
                 <span>Partner</span>
                 <div className="open-link">
-                  <span>Open Website</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M10 7h7v7"></path></svg>
+                  <span>Open Website →</span>
                 </div>
               </div>
             </div>
@@ -248,8 +399,7 @@ function App() {
               <div className="pill-text">
                 <span>Optiverse</span>
                 <div className="open-link">
-                  <span>Open Website</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M10 7h7v7"></path></svg>
+                  <span>Open Website →</span>
                 </div>
               </div>
             </div>
@@ -260,8 +410,7 @@ function App() {
               <div className="pill-text">
                 <span>M Space</span>
                 <div className="open-link">
-                  <span>Open Website</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M10 7h7v7"></path></svg>
+                  <span>Open Website →</span>
                 </div>
               </div>
             </div>
@@ -272,8 +421,7 @@ function App() {
               <div className="pill-text">
                 <span>Partner</span>
                 <div className="open-link">
-                  <span>Open Website</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M10 7h7v7"></path></svg>
+                  <span>Open Website →</span>
                 </div>
               </div>
             </div>
@@ -284,8 +432,7 @@ function App() {
               <div className="pill-text">
                 <span>Artmount</span>
                 <div className="open-link">
-                  <span>Open Website</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M10 7h7v7"></path></svg>
+                  <span>Open Website →</span>
                 </div>
               </div>
             </div>
@@ -295,81 +442,107 @@ function App() {
               <div className="pill-circle"><img src="/logos/Mabs.png" alt="Mabs" /></div>
               <div className="pill-text">
                 <span>MABS</span>
-                <div className="open-link">
-                  <span>Open Website</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M10 7h7v7"></path></svg>
-                </div>
+                <span>Open Website →</span>
               </div>
             </div>
           </div>
         </div>
 
-        <h2 className="section-title">Our Prestigious Firms</h2>
+        <h2 className="section-title">Our Prestigious<br />Firms</h2>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="testimonials-section" id="testimonials">
-        <h2>Hear From Our People</h2>
-        <p className="testimonials-subtitle">
-          Trusted by clients across industries Delivering results that truly matter
-        </p>
+      {/* Testimonials Section - Premium Stack Slider Design */}
+      <section className="testimonials-section-v2" id="testimonials">
+        <div className="testimonials-header">
+          <h2 className="testimonials-title">Hear From Our People</h2>
+          <p className="testimonials-subtitle">Trusted by clients across industries Delivering results that truly matter</p>
+        </div>
 
-        <div className="testimonial-carousel-container">
-          <div className="nav-arrow left" onClick={prevSlide}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
-          </div>
+        <div className="testimonial-container-v2">
+          {/* Navigation Arrows */}
+          <button className="nav-btn prev" onClick={prevSlide} aria-label="Previous">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+          </button>
 
-          <div className="testimonial-card-main-wrapper">
-            {testimonials.map((t, index) => (
-              <div className={getCardClass(index)} key={t.id}>
-                <p>"{t.quote}"</p>
-                <div className="testimonial-user">
-                  <div className="user-avatar">
-                    <img src={t.image} alt={t.name} />
-                  </div>
-                  <div className="user-info">
-                    <h4>{t.name}</h4>
-                    <span>{t.role}</span>
+          <div className="testimonial-stack">
+            {testimonials.map((t, index) => {
+              // Calculate relative index for stacking effect
+              let position = 'hidden';
+              const diff = (index - activeIndex + testimonials.length) % testimonials.length;
+
+              if (diff === 0) position = 'front';
+              else if (diff === 1) position = 'back-1';
+              else if (diff === 2) position = 'back-2';
+              else if (diff === testimonials.length - 1) position = 'out';
+
+              return (
+                <div className={`testimonial-card-v2 ${position}`} key={t.id}>
+                  <div className="card-inner">
+                    <p className="quote-text">“{t.quote}”</p>
+                    <div className="user-profile">
+                      <div className="avatar">
+                        <img src={t.image} alt={t.name} onError={(e) => { e.target.src = '/logos/mam.png'; }} />
+                      </div>
+                      <div className="user-info">
+                        <h4>{t.name}</h4>
+                        <p>{t.role}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          <div className="nav-arrow right" onClick={nextSlide}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
-          </div>
+          <button className="nav-btn next" onClick={nextSlide} aria-label="Next">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </button>
         </div>
       </section>
 
-      {/* Quote/Vision Section */}
+      {/* Quote/Vision Section - Sliding enabled */}
       <section className="quote-cta-section">
         <div className="quote-bg-rings">
           <div className="quote-bg-ring q-ring-top-1"></div>
           <div className="quote-bg-ring q-ring-top-2"></div>
-          <div className="quote-bg-ring q-ring-top-3"></div>
           <div className="quote-bg-ring q-ring-bottom-1"></div>
           <div className="quote-bg-ring q-ring-bottom-2"></div>
-          <div className="quote-bg-ring q-ring-bottom-3"></div>
           <div className="quote-bg-ring q-ring-left-1"></div>
           <div className="quote-bg-ring q-ring-left-2"></div>
-          <div className="quote-bg-ring q-ring-left-3"></div>
         </div>
 
-        <div className="quote-content-container">
-          <div className="quote-portrait">
-            <img src="/logos/mam.png" alt="Hepsibah Catherine Quote"
-              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=776'; }} />
-          </div>
-          <div className="quote-text-block">
-            <h2 className="main-quote">
-              “Great companies are not built by <strong>ideas</strong> alone, but by people who believe in turning those ideas into <strong>reality</strong>.”
-            </h2>
-            <div className="quote-author">
-              <span className="quote-author-name">-Hepsibah Catherine</span>
-              <span className="quote-author-title">Founder & CEO</span>
+        {quotes.map((q, index) => (
+          <div className={`quote-slide-wrap ${index === quoteIndex ? 'active' : ''} ${q.layoutType}`} key={q.id}>
+            <div className="quote-content-container">
+              <div className="quote-portrait">
+                <img src={q.image} alt={q.author}
+                  onError={(e) => { e.target.src = '/logos/mam.png'; }} />
+              </div>
+              <div className="quote-text-block">
+                <h2 className="main-quote" dangerouslySetInnerHTML={{ __html: `“${q.text}”` }}>
+                </h2>
+                <div className="quote-author">
+                  <span className="quote-author-name">-{q.author}</span>
+                  <span className="quote-author-title">{q.title}</span>
+                </div>
+              </div>
             </div>
           </div>
+
+
+
+
+        ))}
+
+        {/* Navigation Dots (Bottom Right) */}
+        <div className="quote-pagination">
+          {quotes.map((_, index) => (
+            <div
+              key={index}
+              className={`pagination-dot ${index === quoteIndex ? 'active' : ''}`}
+              onClick={() => setQuoteIndex(index)}
+            ></div>
+          ))}
         </div>
       </section>
 
@@ -417,19 +590,89 @@ function App() {
 
           <div className="contact-right">
             <div className="form-box-container">
-              <form className="contact-form">
-                <div className="form-row">
-                  <div className="form-group half"><input type="text" placeholder="Your Name*" required /></div>
-                  <div className="form-group half"><input type="email" placeholder="Your Email*" required /></div>
+              {submitStatus === 'success' ? (
+                <div className="success-message">
+                  <h3>Thank You!</h3>
+                  <p>Your message has been sent successfully. I'll get back to you soon.</p>
+                  <button onClick={() => setSubmitStatus(null)} className="submit-btn pill-btn">Send Another Message</button>
                 </div>
-                <div className="form-row">
-                  <div className="form-group half"><input type="text" placeholder="Your Phone*" required /></div>
-                  <div className="form-group half"><input type="text" placeholder="Location*" required /></div>
-                </div>
-                <div className="form-group full"><input type="text" placeholder="Company/Organization*" required /></div>
-                <div className="form-group full"><textarea placeholder="Purpose for connecting*" rows="4" required></textarea></div>
-                <button type="submit" className="submit-btn pill-btn">Get In Touch</button>
-              </form>
+              ) : (
+                <form className="contact-form" onSubmit={handleSubmit}>
+                  <div className="form-row">
+                    <div className="form-group half">
+                      <input 
+                        type="text" 
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Your Name*" 
+                        className={errors.name ? 'error' : ''}
+                      />
+                      {errors.name && <span className="error-text">{errors.name}</span>}
+                    </div>
+                    <div className="form-group half">
+                      <input 
+                        type="email" 
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Your Email*" 
+                        className={errors.email ? 'error' : ''}
+                      />
+                      {errors.email && <span className="error-text">{errors.email}</span>}
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group half">
+                      <input 
+                        type="text" 
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="Your Phone*" 
+                        className={errors.phone ? 'error' : ''}
+                      />
+                      {errors.phone && <span className="error-text">{errors.phone}</span>}
+                    </div>
+                    <div className="form-group half">
+                      <input 
+                        type="text" 
+                        name="location"
+                        value={formData.location}
+                        onChange={handleChange}
+                        placeholder="Location*" 
+                        className={errors.location ? 'error' : ''}
+                      />
+                      {errors.location && <span className="error-text">{errors.location}</span>}
+                    </div>
+                  </div>
+                  <div className="form-group full">
+                    <input 
+                      type="text" 
+                      name="company"
+                      value={formData.company}
+                      onChange={handleChange}
+                      placeholder="Company/Organization*" 
+                      className={errors.company ? 'error' : ''}
+                    />
+                    {errors.company && <span className="error-text">{errors.company}</span>}
+                  </div>
+                  <div className="form-group full">
+                    <textarea 
+                      name="purpose"
+                      value={formData.purpose}
+                      onChange={handleChange}
+                      placeholder="Purpose for connecting*" 
+                      rows="4"
+                      className={errors.purpose ? 'error' : ''}
+                    ></textarea>
+                    {errors.purpose && <span className="error-text">{errors.purpose}</span>}
+                  </div>
+                  <button type="submit" className="submit-btn pill-btn" disabled={isSubmitting}>
+                    {isSubmitting ? 'Sending...' : 'Get In Touch'}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>
@@ -438,12 +681,12 @@ function App() {
       {/* Footer / Contact Hybrid Section */}
       <section className="footer-section" id="footer">
         <div className="footer-globe-bg">
-          <video 
-            src="/logos/video.mp4" 
-            autoPlay 
-            loop 
-            muted 
-            playsInline 
+          <video
+            src="/logos/video.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
             className="background-video"
           />
         </div>
@@ -458,10 +701,18 @@ function App() {
         <div className="footer-bottom-bar">
           <p className="footer-copyright">© 2026 All rights reserved. | Designed & Developed By Manvian</p>
           <div className="footer-socials">
-            <a href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2" target="_blank" rel="noreferrer" className="footer-social-circle"><svg width="24" height="24" fill="#E4405F" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg></a>
-            <a href="mailto:connect@manvian.com" className="footer-social-circle"><svg width="24" height="24" fill="#0072C6" viewBox="0 0 24 24"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 4.612l3.824 3.091l3.824-3.091 5.694 7.038h-19.035l5.693-7.038zm10.201-1.044l4.623-3.746v9.458l-4.623-5.712z" /></svg></a>
-            <a href="https://wa.me/918778359643" target="_blank" rel="noreferrer" className="footer-social-circle"><svg width="24" height="24" fill="#25D366" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.407 3.481s3.48 5.226 3.48 8.408c-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.3 1.667zm5.422-3.772.348.207c1.469.873 3.15 1.335 4.873 1.336 5.176 0 9.39-4.214 9.392-9.391 0-2.507-.975-4.865-2.744-6.634s-4.126-2.744-6.632-2.744c-5.176 0-9.39 4.215-9.392 9.392 0 1.819.522 3.593 1.508 5.137l.228.356-.993 3.63 3.712-.977z" /></svg></a>
-            <a href="https://www.linkedin.com/in/hepsibah-catherine/" target="_blank" rel="noreferrer" className="footer-social-circle"><svg width="24" height="24" fill="#0077B5" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg></a>
+            <a href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2" target="_blank" rel="noreferrer" className="footer-social-circle">
+              <img src="/icons/instagram.png" alt="Instagram" />
+            </a>
+            <a href="mailto:connect@manvian.com" className="footer-social-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
+            </a>
+            <a href="https://wa.me/918778359643" target="_blank" rel="noreferrer" className="footer-social-circle">
+              <img src="/icons/whatsapp.png" alt="WhatsApp" />
+            </a>
+            <a href="https://www.linkedin.com/in/hepsibah-catherine/" target="_blank" rel="noreferrer" className="footer-social-circle">
+              <span className="linkedin-in" style={{ fontSize: '24px' }}>in</span>
+            </a>
           </div>
         </div>
       </section>
