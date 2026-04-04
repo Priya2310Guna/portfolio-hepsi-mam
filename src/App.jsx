@@ -1,6 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './index.css';
-import footerGlobe from './assets/footer-globe.png';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const CountUp = ({ end, duration = 2000, suffix = "" }) => {
+  const [count, setCount] = React.useState(0);
+  const [hasStarted, setHasStarted] = React.useState(false);
+  const elementRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasStarted(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    if (!hasStarted) return;
+
+    let startTime = null;
+    let animationFrame;
+
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = timestamp - startTime;
+      const percentage = Math.min(progress / duration, 1);
+
+      const easeOutQuad = (t) => t * (2 - t);
+
+      setCount(Math.floor(easeOutQuad(percentage) * end));
+
+      if (percentage < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      } else {
+        setCount(end);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [hasStarted, end, duration]);
+
+  return <span ref={elementRef}>{count}{suffix}</span>;
+};
 
 function App() {
   // Testimonials Data
@@ -35,7 +86,6 @@ function App() {
     }
   ];
 
-  const [activeIndex, setActiveIndex] = React.useState(0);
   const [quoteIndex, setQuoteIndex] = React.useState(0);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
@@ -54,7 +104,7 @@ function App() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Special handling for phone to allow only digits and leading +
     if (name === 'phone') {
       const cleaned = value.replace(/(?!^\+)[^\d]/g, '');
@@ -71,7 +121,7 @@ function App() {
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'Name is required';
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -158,24 +208,40 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+
   const nextSlide = () => {
+    setDirection(1);
     setActiveIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const prevSlide = () => {
+    setDirection(-1);
     setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
-  const nextQuote = () => {
-    setQuoteIndex((prev) => (prev + 1) % quotes.length);
-  };
-
-  // Helper to determine position classes for cards
-  const getCardClass = (index) => {
-    if (index === activeIndex) return 'testimonial-card active';
-    if (index === (activeIndex - 1 + testimonials.length) % testimonials.length) return 'testimonial-card side left';
-    if (index === (activeIndex + 1) % testimonials.length) return 'testimonial-card side right';
-    return 'testimonial-card hidden';
+  const variants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 500 : -500,
+      opacity: 0,
+      scale: 0.9,
+      rotate: direction > 0 ? 10 : -10
+    }),
+    center: {
+      zIndex: 10,
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      rotate: 0
+    },
+    exit: (direction) => ({
+      zIndex: 0,
+      x: direction < 0 ? 500 : -500,
+      opacity: 0,
+      scale: 0.9,
+      rotate: direction < 0 ? 10 : -10
+    })
   };
 
   return (
@@ -198,10 +264,22 @@ function App() {
             <a href="#partners" onClick={() => setIsMenuOpen(false)}>FIRMS</a>
             <a href="#testimonials" onClick={() => setIsMenuOpen(false)}>TESTIMONIALS</a>
             <a href="#contact" onClick={() => setIsMenuOpen(false)}>CONTACT</a>
-            <a href="#contact" className="book-btn-mobile" onClick={() => setIsMenuOpen(false)}>Book Appointment</a>
+            <a href="#contact" className="book-btn-mobile" onClick={() => setIsMenuOpen(false)}>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              BOOK APPOINTMENT
+            </a>
           </nav>
           <div className="book-btn-wrapper">
-            <a href="#contact" className="book-btn">Book Appointment</a>
+            <a href="#contact" className="book-btn">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              BOOK APPOINTMENT
+            </a>
           </div>
         </div>
       </header>
@@ -253,19 +331,27 @@ function App() {
       {/* Stats Bar */}
       <section className="stats-bar-navy" style={{ bottom: "90px" }}>
         <div className="stat-box-navy">
-          <span className="sn-num">500+</span>
+          <span className="sn-num">
+            <CountUp end={500} suffix="+" />
+          </span>
           <span className="sn-text">Successful Projects</span>
         </div>
         <div className="stat-box-navy">
-          <span className="sn-num">10+</span>
+          <span className="sn-num">
+            <CountUp end={10} suffix="+" />
+          </span>
           <span className="sn-text">Country Presence</span>
         </div>
         <div className="stat-box-navy">
-          <span className="sn-num">5+</span>
+          <span className="sn-num">
+            <CountUp end={5} suffix="+" />
+          </span>
           <span className="sn-text">Years of Experience</span>
         </div>
         <div className="stat-box-navy">
-          <span className="sn-num">30+</span>
+          <span className="sn-num">
+            <CountUp end={30} suffix="+" />
+          </span>
           <span className="sn-text">Opportunities Created</span>
         </div>
       </section>
@@ -451,7 +537,6 @@ function App() {
         <h2 className="section-title">Our Prestigious<br />Firms</h2>
       </section>
 
-      {/* Testimonials Section - Premium Stack Slider Design */}
       <section className="testimonials-section-v2" id="testimonials">
         <div className="testimonials-header">
           <h2 className="testimonials-title">Hear From Our People</h2>
@@ -461,41 +546,74 @@ function App() {
         <div className="testimonial-container-v2">
           {/* Navigation Arrows */}
           <button className="nav-btn prev" onClick={prevSlide} aria-label="Previous">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
 
           <div className="testimonial-stack">
-            {testimonials.map((t, index) => {
-              // Calculate relative index for stacking effect
-              let position = 'hidden';
-              const diff = (index - activeIndex + testimonials.length) % testimonials.length;
-
-              if (diff === 0) position = 'front';
-              else if (diff === 1) position = 'back-1';
-              else if (diff === 2) position = 'back-2';
-              else if (diff === testimonials.length - 1) position = 'out';
-
-              return (
-                <div className={`testimonial-card-v2 ${position}`} key={t.id}>
-                  <div className="card-inner">
-                    <p className="quote-text">“{t.quote}”</p>
-                    <div className="user-profile">
-                      <div className="avatar">
-                        <img src={t.image} alt={t.name} onError={(e) => { e.target.src = '/logos/mam.png'; }} />
-                      </div>
-                      <div className="user-info">
-                        <h4>{t.name}</h4>
-                        <p>{t.role}</p>
-                      </div>
+            <AnimatePresence initial={false} custom={direction}>
+              {/* Main Active Card */}
+              <motion.div
+                key={activeIndex}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate={{
+                  ...variants.center,
+                  y: [0, -8, 0]
+                }}
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.4 },
+                  scale: { duration: 0.4 },
+                  y: {
+                    repeat: Infinity,
+                    duration: 4,
+                    ease: "easeInOut"
+                  }
+                }}
+                className="testimonial-card-v2 active"
+              >
+                <div className="card-inner">
+                  <p className="quote-text">“{testimonials[activeIndex].quote}”</p>
+                  <div className="user-profile">
+                    <div className="avatar">
+                      <img src={testimonials[activeIndex].image} alt={testimonials[activeIndex].name} />
+                    </div>
+                    <div className="user-info">
+                      <h4>{testimonials[activeIndex].name}</h4>
+                      <p>{testimonials[activeIndex].role}</p>
                     </div>
                   </div>
                 </div>
-              );
-            })}
+              </motion.div>
+
+              {/* Stacked Card 1 (Behind) */}
+              <motion.div
+                key={`bg-1-${activeIndex}`}
+                initial={{ opacity: 0, scale: 0.9, y: -30 }}
+                animate={{ opacity: 0.6, scale: 0.96, y: -15 }}
+                exit={{ opacity: 0, scale: 0.9, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="testimonial-card-v2 background-card-1"
+                style={{ zIndex: 5, pointerEvents: 'none', filter: 'blur(3px)' }}
+              />
+
+              {/* Stacked Card 2 (Further Back) */}
+              <motion.div
+                key={`bg-2-${activeIndex}`}
+                initial={{ opacity: 0, scale: 0.85, y: -50 }}
+                animate={{ opacity: 0.3, scale: 0.92, y: -30 }}
+                exit={{ opacity: 0, scale: 0.85, y: -15 }}
+                transition={{ duration: 0.6 }}
+                className="testimonial-card-v2 background-card-2"
+                style={{ zIndex: 1, pointerEvents: 'none', filter: 'blur(6px)' }}
+              />
+            </AnimatePresence>
           </div>
 
           <button className="nav-btn next" onClick={nextSlide} aria-label="Next">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6" /></svg>
           </button>
         </div>
       </section>
@@ -600,23 +718,23 @@ function App() {
                 <form className="contact-form" onSubmit={handleSubmit}>
                   <div className="form-row">
                     <div className="form-group half">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Your Name*" 
+                        placeholder="Your Name*"
                         className={errors.name ? 'error' : ''}
                       />
                       {errors.name && <span className="error-text">{errors.name}</span>}
                     </div>
                     <div className="form-group half">
-                      <input 
-                        type="email" 
+                      <input
+                        type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="Your Email*" 
+                        placeholder="Your Email*"
                         className={errors.email ? 'error' : ''}
                       />
                       {errors.email && <span className="error-text">{errors.email}</span>}
@@ -624,45 +742,45 @@ function App() {
                   </div>
                   <div className="form-row">
                     <div className="form-group half">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="Your Phone*" 
+                        placeholder="Your Phone*"
                         className={errors.phone ? 'error' : ''}
                       />
                       {errors.phone && <span className="error-text">{errors.phone}</span>}
                     </div>
                     <div className="form-group half">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         name="location"
                         value={formData.location}
                         onChange={handleChange}
-                        placeholder="Location*" 
+                        placeholder="Location*"
                         className={errors.location ? 'error' : ''}
                       />
                       {errors.location && <span className="error-text">{errors.location}</span>}
                     </div>
                   </div>
                   <div className="form-group full">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
-                      placeholder="Company/Organization*" 
+                      placeholder="Company/Organization*"
                       className={errors.company ? 'error' : ''}
                     />
                     {errors.company && <span className="error-text">{errors.company}</span>}
                   </div>
                   <div className="form-group full">
-                    <textarea 
+                    <textarea
                       name="purpose"
                       value={formData.purpose}
                       onChange={handleChange}
-                      placeholder="Purpose for connecting*" 
+                      placeholder="Purpose for connecting*"
                       rows="4"
                       className={errors.purpose ? 'error' : ''}
                     ></textarea>
