@@ -796,13 +796,13 @@ function App() {
         </div>
 
         <h2 className="section-title">
-          <div style={{ display: 'inline-block', overflow: 'hidden' }}>
+          <div style={{ display: 'inline-block' }}>
             {"Our Prestigious".split("").map((letter, index) => (
               <motion.span
                 key={index}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false }}
+                viewport={{ once: false, amount: 0.1 }}
                 transition={{ duration: 0.4, delay: index * 0.04 }}
                 style={{ display: 'inline-block' }}
               >
@@ -811,13 +811,13 @@ function App() {
             ))}
           </div>
           <br />
-          <div style={{ display: 'inline-block', overflow: 'hidden' }}>
+          <div style={{ display: 'inline-block' }}>
             {"Firms".split("").map((letter, index) => (
               <motion.span
                 key={index}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false }}
+                viewport={{ once: false, amount: 0.1 }}
                 transition={{ duration: 0.4, delay: (index + 15) * 0.04 }}
                 style={{ display: 'inline-block' }}
               >

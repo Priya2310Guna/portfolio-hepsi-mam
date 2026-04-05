@@ -2960,16 +2960,18 @@ header .nav-links a:hover {
 
   .section-title {
     position: relative !important;
-    bottom: 295px !important;
+    bottom: 332px !important;
     left: auto !important;
     transform: none !important;
-    font-size: 20px !important;
+    font-size: 15px !important;
     text-align: center !important;
     width: 100% !important;
-    margin-bottom: 20px !important;
+    margin: 0 !important;
     padding: 0 20px !important;
-    z-index: 20 !important;
+    z-index: 200 !important;
     color: white !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .pill-text {
@@ -3000,9 +3002,12 @@ header .nav-links a:hover {
 
   /* Testimonials Section V2 Mobile */
   .testimonials-section-v2 {
-    bottom: 324px !important;
-    padding: 50px 20px !important;
-    /* Reduced padding */
+    position: relative !important;
+    bottom: 0 !important;
+    padding: 60px 20px !important;
+    margin-top: -300px !important;
+    /* Bring it up to overlap the firms section appropriately */
+    z-index: 50 !important;
   }
 
   .testimonials-header {
