@@ -78,6 +78,67 @@ body {
   background-color: var(--bg-color);
   color: var(--text-dark);
   overflow-x: hidden;
+  cursor: none;
+  /* Hide default cursor */
+}
+
+/* Geometric Morphing Custom Cursor */
+.custom-cursor-container {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10002;
+  overflow: visible;
+}
+
+.cursor-trail {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--primary-blue);
+  background: rgba(13, 63, 128, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cursor-point {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: var(--primary-blue);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.cursor-dot-trail {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: rgba(13, 63, 128, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.cursor-inner-text {
+  font-size: 20px;
+  display: block;
+}
+
+/* Ensure all interactive elements also hide the native cursor */
+a,
+button,
+input,
+textarea,
+.pagination-dot,
+.nav-item,
+[role="button"] {
+  cursor: none !important;
 }
 
 .app-container {
@@ -2049,9 +2110,24 @@ header .nav-links a:hover {
 }
 
 .submit-btn.pill-btn:disabled {
-  background: #cccccc !important;
-  cursor: not-allowed;
+  background: linear-gradient(90deg, #cccccc 0%, #eeeeee 50%, #cccccc 100%) !important;
+  background-size: 200% 100% !important;
+  animation: loading-shine 1.5s infinite linear !important;
+  color: #666 !important;
+  cursor: wait !important;
+  position: relative;
+  overflow: hidden;
   transform: none !important;
+}
+
+@keyframes loading-shine {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Form Validation Styles */
@@ -2080,19 +2156,71 @@ header .nav-links a:hover {
 .success-message {
   text-align: center;
   padding: 40px 20px;
-  animation: fadeIn 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(13, 63, 128, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px;
+  color: #0D3F80;
 }
 
 .success-message h3 {
   color: #0D3F80;
-  font-size: 32px;
+  font-size: 38px;
   margin-bottom: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* Shimmering Success Text */
+.shimmer-text {
+  background: linear-gradient(90deg, #0D3F80 0%, #78AFFD 50%, #0D3F80 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2.5s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% center;
+  }
+
+  100% {
+    background-position: -200% center;
+  }
+}
+
+/* Success Checkmark Drawing Animation */
+.checkmark-path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: draw-check 0.8s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  animation-delay: 0.4s;
+}
+
+@keyframes draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .success-message p {
   color: #666;
   font-size: 18px;
   margin-bottom: 30px;
+  max-width: 400px;
+  line-height: 1.6;
 }
 
 @keyframes fadeIn {

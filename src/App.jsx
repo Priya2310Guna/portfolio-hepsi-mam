@@ -101,14 +101,29 @@ function App() {
   const [errors, setErrors] = React.useState({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitStatus, setSubmitStatus] = React.useState(null);
+  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeout = React.useRef(null);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      setIsScrolling(true);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => setIsScrolling(false), 300);
     };
+
+    window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const navItemVariants = {
@@ -279,6 +294,51 @@ function App() {
 
   return (
     <div className="app-container">
+      <div className="custom-cursor-container">
+        {/* Main Morphing Diamond/Circle */}
+        <motion.div
+          className="cursor-trail"
+          animate={{
+            x: mousePos.x - (isScrolling ? 30 : 10),
+            y: mousePos.y - (isScrolling ? 30 : 10),
+            rotate: isScrolling ? 0 : 45,
+            borderRadius: isScrolling ? "50%" : "4px",
+            width: isScrolling ? 60 : 20,
+            height: isScrolling ? 60 : 20,
+            scale: isScrolling ? 1.2 : 1,
+            backgroundColor: isScrolling ? 'rgba(13, 63, 128, 0.9)' : 'rgba(13, 63, 128, 0.1)',
+            borderColor: isScrolling ? '#78AFFD' : '#0D3F80',
+          }}
+          transition={{ type: 'spring', damping: 25, stiffness: 150 }}
+        >
+          <motion.span
+            className="cursor-inner-text"
+            animate={isScrolling || isSubmitting ? { rotate: [0, 360], scale: [1, 1.2, 1] } : { rotate: 0, scale: 0 }}
+            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+          >
+            {isSubmitting ? '🚀' : (isScrolling ? '🖱️' : '')}
+          </motion.span>
+        </motion.div>
+
+        {/* Trailing Dots for motion feel */}
+        {[1, 2, 3].map((i) => (
+          <motion.div
+            key={i}
+            className="cursor-dot-trail"
+            animate={{
+              x: mousePos.x - 2,
+              y: mousePos.y - 2,
+            }}
+            transition={{ type: 'spring', damping: 15 + i * 5, stiffness: 100 - i * 10, mass: 0.5 + i * 0.2 }}
+          />
+        ))}
+
+        <motion.div
+          className="cursor-point"
+          animate={{ x: mousePos.x - 2, y: mousePos.y - 2 }}
+          transition={{ type: 'spring', damping: 30, stiffness: 400, mass: 0.2 }}
+        />
+      </div>
       {/* Premium Scroll Progress Bar */}
       <div className="scroll-progress-container">
         <motion.div
@@ -735,7 +795,37 @@ function App() {
           </div>
         </div>
 
-        <h2 className="section-title">Our Prestigious<br />Firms</h2>
+        <h2 className="section-title">
+          <div style={{ display: 'inline-block', overflow: 'hidden' }}>
+            {"Our Prestigious".split("").map((letter, index) => (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false }}
+                transition={{ duration: 0.4, delay: index * 0.04 }}
+                style={{ display: 'inline-block' }}
+              >
+                {letter === " " ? "\u00A0" : letter}
+              </motion.span>
+            ))}
+          </div>
+          <br />
+          <div style={{ display: 'inline-block', overflow: 'hidden' }}>
+            {"Firms".split("").map((letter, index) => (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false }}
+                transition={{ duration: 0.4, delay: (index + 15) * 0.04 }}
+                style={{ display: 'inline-block' }}
+              >
+                {letter === " " ? "\u00A0" : letter}
+              </motion.span>
+            ))}
+          </div>
+        </h2>
       </section>
 
       <section className="testimonials-section-v2" id="testimonials">
@@ -1012,90 +1102,184 @@ function App() {
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             style={{ perspective: '1000px' }}
           >
-            <div className="form-box-container">
-              {submitStatus === 'success' ? (
-                <div className="success-message">
-                  <h3>Thank You!</h3>
-                  <p>Your message has been sent successfully. I'll get back to you soon.</p>
-                  <button onClick={() => setSubmitStatus(null)} className="submit-btn pill-btn">Send Another Message</button>
-                </div>
-              ) : (
-                <form className="contact-form" onSubmit={handleSubmit}>
-                  <div className="form-row">
-                    <div className="form-group half">
+            <div className="form-box-container" style={{ position: 'relative', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AnimatePresence mode="wait">
+                {submitStatus === 'success' ? (
+                  <motion.div
+                    key="success"
+                    className="success-message"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{
+                      opacity: 1,
+                      scale: 1,
+                      y: [0, -10, 0] // Gentle ambient float
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      opacity: { duration: 0.5 },
+                      scale: { duration: 0.5 },
+                      y: { repeat: Infinity, duration: 4, ease: "easeInOut" }
+                    }}
+                  >
+                    {/* Decorative Confetti Pieces */}
+                    {[...Array(25)].map((_, i) => {
+                      const randomX = Math.random() * 800 - 400;
+                      const randomY = Math.random() * 600 - 300;
+                      const randomColor = ['#0D3F80', '#A0522D', '#78AFFD', '#FFD700', '#FFFFFF'][Math.floor(Math.random() * 5)];
+
+                      return (
+                        <motion.div
+                          key={i}
+                          className="confetti-piece"
+                          initial={{ x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }}
+                          animate={{
+                            x: randomX,
+                            y: randomY,
+                            opacity: 0,
+                            scale: 0.5,
+                            rotate: Math.random() * 1080
+                          }}
+                          transition={{
+                            duration: 1.8 + Math.random(),
+                            delay: 0.2,
+                            ease: "easeOut"
+                          }}
+                          style={{ backgroundColor: randomColor }}
+                        />
+                      );
+                    })}
+
+                    <motion.div
+                      className="success-icon"
+                      initial={{ scale: 0, rotate: -45 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.2, type: 'spring', damping: 12, stiffness: 200 }}
+                    >
+                      <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline className="checkmark-path" points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </motion.div>
+                    <motion.h3
+                      className="shimmer-text"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      Thank You!
+                    </motion.h3>
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      Your message has been sent successfully. I'll get back to you soon.
+                    </motion.p>
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.7 }}
+                      onClick={() => setSubmitStatus(null)}
+                      className="submit-btn pill-btn"
+                    >
+                      Send Another Message
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  <motion.form
+                    key="form"
+                    className="contact-form"
+                    onSubmit={handleSubmit}
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0, filter: 'blur(10px)', scale: 0.95 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <div className="form-row">
+                      <div className="form-group half">
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Your Name*"
+                          className={errors.name ? 'error' : ''}
+                        />
+                        {errors.name && <span className="error-text">{errors.name}</span>}
+                      </div>
+                      <div className="form-group half">
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="Your Email*"
+                          className={errors.email ? 'error' : ''}
+                        />
+                        {errors.email && <span className="error-text">{errors.email}</span>}
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <div className="form-group half">
+                        <input
+                          type="text"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="Your Phone*"
+                          className={errors.phone ? 'error' : ''}
+                        />
+                        {errors.phone && <span className="error-text">{errors.phone}</span>}
+                      </div>
+                      <div className="form-group half">
+                        <input
+                          type="text"
+                          name="location"
+                          value={formData.location}
+                          onChange={handleChange}
+                          placeholder="Location*"
+                          className={errors.location ? 'error' : ''}
+                        />
+                        {errors.location && <span className="error-text">{errors.location}</span>}
+                      </div>
+                    </div>
+                    <div className="form-group full">
                       <input
                         type="text"
-                        name="name"
-                        value={formData.name}
+                        name="company"
+                        value={formData.company}
                         onChange={handleChange}
-                        placeholder="Your Name*"
-                        className={errors.name ? 'error' : ''}
+                        placeholder="Company/Organization*"
+                        className={errors.company ? 'error' : ''}
                       />
-                      {errors.name && <span className="error-text">{errors.name}</span>}
+                      {errors.company && <span className="error-text">{errors.company}</span>}
                     </div>
-                    <div className="form-group half">
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
+                    <div className="form-group full">
+                      <textarea
+                        name="purpose"
+                        value={formData.purpose}
                         onChange={handleChange}
-                        placeholder="Your Email*"
-                        className={errors.email ? 'error' : ''}
-                      />
-                      {errors.email && <span className="error-text">{errors.email}</span>}
+                        placeholder="Purpose for connecting*"
+                        rows="4"
+                        className={errors.purpose ? 'error' : ''}
+                      ></textarea>
+                      {errors.purpose && <span className="error-text">{errors.purpose}</span>}
                     </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group half">
-                      <input
-                        type="text"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="Your Phone*"
-                        className={errors.phone ? 'error' : ''}
-                      />
-                      {errors.phone && <span className="error-text">{errors.phone}</span>}
-                    </div>
-                    <div className="form-group half">
-                      <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleChange}
-                        placeholder="Location*"
-                        className={errors.location ? 'error' : ''}
-                      />
-                      {errors.location && <span className="error-text">{errors.location}</span>}
-                    </div>
-                  </div>
-                  <div className="form-group full">
-                    <input
-                      type="text"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      placeholder="Company/Organization*"
-                      className={errors.company ? 'error' : ''}
-                    />
-                    {errors.company && <span className="error-text">{errors.company}</span>}
-                  </div>
-                  <div className="form-group full">
-                    <textarea
-                      name="purpose"
-                      value={formData.purpose}
-                      onChange={handleChange}
-                      placeholder="Purpose for connecting*"
-                      rows="4"
-                      className={errors.purpose ? 'error' : ''}
-                    ></textarea>
-                    {errors.purpose && <span className="error-text">{errors.purpose}</span>}
-                  </div>
-                  <button type="submit" className="submit-btn pill-btn" disabled={isSubmitting}>
-                    {isSubmitting ? 'Sending...' : 'Get In Touch'}
-                  </button>
-                </form>
-              )}
+                    <button type="submit" className="submit-btn pill-btn" disabled={isSubmitting} style={{ cursor: isSubmitting ? 'url(data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewport=%220 0 16 16%22><text x=%220%22 y=%2214%22>🚀</text></svg>) 16 16, auto' : 'pointer' }}>
+                      {isSubmitting ? (
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                          <motion.span
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                            style={{ display: 'inline-block' }}
+                          >
+                            ⏳
+                          </motion.span>
+                          Sending...
+                        </span>
+                      ) : 'Get In Touch'}
+                    </button>
+                  </motion.form>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         </div>
@@ -1159,8 +1343,7 @@ function App() {
             whileInView={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.6 }}
           >
-            © 2026 All rights reserved. | <br />
-            Designed & Developed By Manvian
+            © 2026 All rights reserved. | Designed & Developed By Manvian
           </motion.p>
           <motion.div
             className="footer-socials"
