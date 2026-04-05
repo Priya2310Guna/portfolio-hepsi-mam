@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'framer-motion';
 
 const CountUp = ({ end, duration = 2000, suffix = "" }) => {
   const [count, setCount] = React.useState(0);
@@ -26,9 +26,9 @@ const CountUp = ({ end, duration = 2000, suffix = "" }) => {
 
   React.useEffect(() => {
     if (!hasStarted) return;
-
     let startTime = null;
     let animationFrame;
+
 
     const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
@@ -101,6 +101,28 @@ function App() {
   const [errors, setErrors] = React.useState({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitStatus, setSubmitStatus] = React.useState(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navItemVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.1 * i,
+        duration: 0.8,
+        ease: [0.16, 1, 0.3, 1]
+      }
+    })
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -223,10 +245,10 @@ function App() {
 
   const variants = {
     enter: (direction) => ({
-      x: direction > 0 ? 500 : -500,
+      x: direction > 0 ? 150 : -150,
       opacity: 0,
-      scale: 0.9,
-      rotate: direction > 0 ? 10 : -10
+      scale: 0.95,
+      rotate: direction > 0 ? 5 : -5
     }),
     center: {
       zIndex: 10,
@@ -237,22 +259,41 @@ function App() {
     },
     exit: (direction) => ({
       zIndex: 0,
-      x: direction < 0 ? 500 : -500,
+      x: direction < 0 ? 150 : -150,
       opacity: 0,
-      scale: 0.9,
-      rotate: direction < 0 ? 10 : -10
+      scale: 0.95,
+      rotate: direction < 0 ? 5 : -5
     })
   };
 
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  const heroY = useTransform(scrollYProgress, [0, 0.2], [0, 100]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+  const globeScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.2]);
+
   return (
     <div className="app-container">
+      {/* Premium Scroll Progress Bar */}
+      <div className="scroll-progress-container">
+        <motion.div
+          className="scroll-progress-bar"
+          style={{ scaleX }}
+        />
+      </div>
+
       {/* Background patterns for Hero section */}
       <div className="bg-pattern" />
 
 
 
       {/* Header */}
-      <header>
+      <header className={scrolled ? 'sticky-header' : ''}>
         <div className="header-container">
           <button className={`menu-toggle ${isMenuOpen ? 'active' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
             <span></span>
@@ -260,114 +301,261 @@ function App() {
             <span></span>
           </button>
           <nav className={`nav-links ${isMenuOpen ? 'mobile-open' : ''}`}>
-            <a href="#about" onClick={() => setIsMenuOpen(false)}>ABOUT</a>
-            <a href="#partners" onClick={() => setIsMenuOpen(false)}>FIRMS</a>
-            <a href="#testimonials" onClick={() => setIsMenuOpen(false)}>TESTIMONIALS</a>
-            <a href="#contact" onClick={() => setIsMenuOpen(false)}>CONTACT</a>
-            <a href="#contact" className="book-btn-mobile" onClick={() => setIsMenuOpen(false)}>
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
+            {['ABOUT', 'FIRMS', 'TESTIMONIALS', 'CONTACT'].map((item, i) => (
+              <motion.a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                onClick={() => setIsMenuOpen(false)}
+                custom={i}
+                initial="hidden"
+                animate="visible"
+                variants={navItemVariants}
+                whileHover={{ y: -2 }}
+              >
+                {item}
+              </motion.a>
+            ))}
+            <motion.a
+              href="#contact"
+              className="book-btn-mobile"
+              onClick={() => setIsMenuOpen(false)}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
               BOOK APPOINTMENT
-            </a>
+            </motion.a>
           </nav>
           <div className="book-btn-wrapper">
-            <a href="#contact" className="book-btn">
+            <motion.a
+              href="#contact"
+              className="book-btn"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            >
               <span></span>
               <span></span>
               <span></span>
               <span></span>
               BOOK APPOINTMENT
-            </a>
+            </motion.a>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
       <main className="hero">
-        <div className="hero-container">
-          <div className="hero-left">
+        <div className="hero-container" style={{ perspective: '1000px' }}>
+          <motion.div
+            className="hero-left"
+            initial={{ opacity: 0, y: 50, rotateX: 10 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            style={{ y: heroY, opacity: heroOpacity }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          >
             <p className="hero-hello">Hello! I'm <span className="name">Hepsibah Catherine</span></p>
             <h1 className="hero-title">Multipreneur<br />& Consultant</h1>
             <p className="hero-quote">
               “Building for <span className="highlight">people</span> and planet with purpose.”
             </p>
-          </div>
+          </motion.div>
 
-          <div className="hero-right">
+          <motion.div
+            className="hero-right"
+            initial={{ opacity: 0, scale: 0.8, rotateY: 20 }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            style={{ scale: globeScale }}
+            transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+          >
             <div className="hero-blue-arc"></div>
-            <div className="main-portrait">
+            <motion.div
+              className="main-portrait"
+              animate={{
+                y: [0, -15, 0],
+                rotateZ: [0, 1, 0]
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{ transformStyle: 'preserve-3d' }}
+            >
               <img src="/logos/mam.png" alt="Hepsibah Catherine"
                 onError={(e) => {
                   e.target.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=776';
                 }}
               />
-            </div>
-          </div>
-
+            </motion.div>
+          </motion.div>
           {/* Social Bar - moved outside hero-right so it can flow below portrait on mobile */}
-          <div className="vertical-social-bar">
+          <motion.div
+            className="vertical-social-bar"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.2, delayChildren: 0.5 }
+              }
+            }}
+          >
             {/* Instagram */}
-            <a href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2" target="_blank" rel="noreferrer" className="social-pill">
+            <motion.a
+              href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2"
+              target="_blank"
+              rel="noreferrer"
+              className="social-pill"
+              variants={{
+                hidden: { x: 50, opacity: 0, rotateY: 45 },
+                visible: { x: 0, opacity: 1, rotateY: 0 }
+              }}
+              whileHover={{
+                scale: 1.15,
+                rotateY: 10,
+                boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
+                backgroundColor: "#F0F7FF"
+              }}
+            >
               <img src="/icons/instagram.png" alt="Instagram" />
-            </a>
+            </motion.a>
             {/* Email */}
-            <a href="mailto:connect@manvian.com" className="social-pill">
+            <motion.a
+              href="mailto:connect@manvian.com"
+              className="social-pill"
+              variants={{
+                hidden: { x: 50, opacity: 0, rotateY: 45 },
+                visible: { x: 0, opacity: 1, rotateY: 0 }
+              }}
+              whileHover={{
+                scale: 1.15,
+                rotateY: 10,
+                boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
+                backgroundColor: "#F0F7FF"
+              }}
+            >
               <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
-            </a>
+            </motion.a>
             {/* WhatsApp */}
-            <a href="https://wa.me/918778359643" target="_blank" rel="noreferrer" className="social-pill">
+            <motion.a
+              href="https://wa.me/918778359643"
+              target="_blank"
+              rel="noreferrer"
+              className="social-pill"
+              variants={{
+                hidden: { x: 50, opacity: 0, rotateY: 45 },
+                visible: { x: 0, opacity: 1, rotateY: 0 }
+              }}
+              whileHover={{
+                scale: 1.15,
+                rotateY: 10,
+                boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
+                backgroundColor: "#F0F7FF"
+              }}
+            >
               <img src="/icons/whatsapp.png" alt="WhatsApp" />
-            </a>
+            </motion.a>
             {/* LinkedIn */}
-            <a href="https://www.linkedin.com/in/hepsibah-catherine/" target="_blank" rel="noreferrer" className="social-pill">
+            <motion.a
+              href="https://www.linkedin.com/in/hepsibah_catherine/"
+              target="_blank"
+              rel="noreferrer"
+              className="social-pill"
+              variants={{
+                hidden: { x: 50, opacity: 0, rotateY: 45 },
+                visible: { x: 0, opacity: 1, rotateY: 0 }
+              }}
+              whileHover={{
+                scale: 1.15,
+                rotateY: 10,
+                boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
+                backgroundColor: "#F0F7FF"
+              }}
+            >
               <span className="linkedin-in" style={{ fontSize: '24px' }}>in</span>
-            </a>
-          </div>
+            </motion.a>
+          </motion.div>
         </div>
       </main>
 
       {/* Stats Bar */}
-      <section className="stats-bar-navy" style={{ bottom: "90px" }}>
-        <div className="stat-box-navy">
+      <section className="stats-bar-navy">
+        <motion.div
+          className="stat-box-navy"
+          initial={{ opacity: 0, scale: 0.8, rotateX: 30 }}
+          whileInView={{ opacity: 1, scale: 1, rotateX: 0 }}
+          viewport={{ once: false }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+        >
           <span className="sn-num">
             <CountUp end={500} suffix="+" />
           </span>
           <span className="sn-text">Successful Projects</span>
-        </div>
-        <div className="stat-box-navy">
+        </motion.div>
+        <motion.div
+          className="stat-box-navy"
+          initial={{ opacity: 0, scale: 0.8, rotateX: 30 }}
+          whileInView={{ opacity: 1, scale: 1, rotateX: 0 }}
+          viewport={{ once: false }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
           <span className="sn-num">
             <CountUp end={10} suffix="+" />
           </span>
           <span className="sn-text">Country Presence</span>
-        </div>
-        <div className="stat-box-navy">
+        </motion.div>
+        <motion.div
+          className="stat-box-navy"
+          initial={{ opacity: 0, scale: 0.8, rotateX: 30 }}
+          whileInView={{ opacity: 1, scale: 1, rotateX: 0 }}
+          viewport={{ once: false }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        >
           <span className="sn-num">
             <CountUp end={5} suffix="+" />
           </span>
           <span className="sn-text">Years of Experience</span>
-        </div>
-        <div className="stat-box-navy">
+        </motion.div>
+        <motion.div
+          className="stat-box-navy"
+          initial={{ opacity: 0, scale: 0.8, rotateX: 30 }}
+          whileInView={{ opacity: 1, scale: 1, rotateX: 0 }}
+          viewport={{ once: false }}
+          transition={{ duration: 0.8, delay: 0.7 }}
+        >
           <span className="sn-num">
             <CountUp end={30} suffix="+" />
           </span>
           <span className="sn-text">Opportunities Created</span>
-        </div>
+        </motion.div>
       </section>
 
       {/* About Me Section */}
       <section className="about-section" id="about">
-        <div className="about-intro">
+        <motion.div
+          className="about-intro"
+          initial={{ opacity: 0, y: 50, rotateX: 20 }}
+          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
           <h2>About Me</h2>
           <p>
             As a CEO, I believe leadership is about vision, innovation, and people. My journey has been driven by the passion to build meaningful solutions that create real impact. I focus on leading with clarity, empowering talented teams, and continuously exploring new opportunities for growth. Through strategic thinking and strong execution, I strive to guide my company toward excellence while creating lasting value for our clients and community.
           </p>
-        </div>
-
+        </motion.div>
         <div className="cards-container">
           {/* Mission Card */}
-          <div className="info-card">
+          <motion.div
+            className="info-card"
+            initial={{ opacity: 0, y: "var(--card-y, 100)", rotateY: "var(--card-rotate, -15)", scale: 0.9 }}
+            whileInView={{ opacity: 1, y: 0, rotateY: 0, scale: 1 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+            whileHover={{ scale: 1.03, rotateY: 5, translateZ: 20 }}
+          >
             <div className="card-icon-wrapper">
               <img src="/icons/mission.png" alt="Mission" />
             </div>
@@ -376,10 +564,17 @@ function App() {
               <div className="card-separator"></div>
               <p>To drive innovation and deliver meaningful growth for customers and stakeholders. We focus on creating impactful solutions that add long-term value.</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Vision Card */}
-          <div className="info-card">
+          <motion.div
+            className="info-card"
+            initial={{ opacity: 0, y: "var(--card-y, 100)", rotateY: "var(--card-rotate, -15)", scale: 0.9 }}
+            whileInView={{ opacity: 1, y: 0, rotateY: 0, scale: 1 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+            whileHover={{ scale: 1.03, rotateY: 5, translateZ: 20 }}
+          >
             <div className="card-icon-wrapper">
               <img src="/icons/vision.png" alt="Vision" />
             </div>
@@ -387,12 +582,18 @@ function App() {
               <h3>Vision</h3>
               <div className="card-separator"></div>
               <p>To build a future-ready organization that leads with purpose and inspires change. We aim to set new standards of excellence in everything we do.</p>
-
             </div>
-          </div>
+          </motion.div>
 
           {/* Values Card */}
-          <div className="info-card">
+          <motion.div
+            className="info-card"
+            initial={{ opacity: 0, y: "var(--card-y, 100)", rotateY: "var(--card-rotate, -15)", scale: 0.9 }}
+            whileInView={{ opacity: 1, y: 0, rotateY: 0, scale: 1 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+            whileHover={{ scale: 1.03, rotateY: 5, translateZ: 20 }}
+          >
             <div className="card-icon-wrapper">
               <img src="/icons/values.png" alt="Values" />
             </div>
@@ -401,7 +602,7 @@ function App() {
               <div className="card-separator"></div>
               <p>We believe in integrity, innovation, and excellence in every action. Collaboration and a customer-first approach guide our decisions.</p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -538,12 +739,24 @@ function App() {
       </section>
 
       <section className="testimonials-section-v2" id="testimonials">
-        <div className="testimonials-header">
+        <motion.div
+          className="testimonials-header"
+          initial={{ opacity: 0, y: 30, rotateX: 15 }}
+          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+          viewport={{ once: false }}
+          transition={{ duration: 1 }}
+        >
           <h2 className="testimonials-title">Hear From Our People</h2>
           <p className="testimonials-subtitle">Trusted by clients across industries Delivering results that truly matter</p>
-        </div>
+        </motion.div>
 
-        <div className="testimonial-container-v2">
+        <motion.div
+          className="testimonial-container-v2"
+          initial={{ opacity: 0, scale: 0.95, y: 50 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: false, margin: "-100px" }}
+          transition={{ duration: 1, delay: 0.2 }}
+        >
           {/* Navigation Arrows */}
           <button className="nav-btn prev" onClick={prevSlide} aria-label="Previous">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6" /></svg>
@@ -573,6 +786,11 @@ function App() {
                   }
                 }}
                 className="testimonial-card-v2 active"
+                whileHover={{
+                  scale: 1.02,
+                  boxShadow: "0 25px 50px rgba(13, 63, 128, 0.15)",
+                  translateY: -5
+                }}
               >
                 <div className="card-inner">
                   <p className="quote-text">“{testimonials[activeIndex].quote}”</p>
@@ -615,42 +833,73 @@ function App() {
           <button className="nav-btn next" onClick={nextSlide} aria-label="Next">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6" /></svg>
           </button>
-        </div>
+        </motion.div>
       </section>
 
       {/* Quote/Vision Section - Sliding enabled */}
       <section className="quote-cta-section">
-        <div className="quote-bg-rings">
+        <motion.div
+          className="quote-bg-rings"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: false, amount: 0.3 }}
+        >
           <div className="quote-bg-ring q-ring-top-1"></div>
           <div className="quote-bg-ring q-ring-top-2"></div>
           <div className="quote-bg-ring q-ring-bottom-1"></div>
           <div className="quote-bg-ring q-ring-bottom-2"></div>
           <div className="quote-bg-ring q-ring-left-1"></div>
           <div className="quote-bg-ring q-ring-left-2"></div>
-        </div>
+        </motion.div>
 
-        {quotes.map((q, index) => (
-          <div className={`quote-slide-wrap ${index === quoteIndex ? 'active' : ''} ${q.layoutType}`} key={q.id}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={quoteIndex}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.8 }}
+            className={`quote-slide-wrap active ${quotes[quoteIndex].layoutType}`}
+          >
             <div className="quote-content-container">
-              <div className="quote-portrait">
-                <img src={q.image} alt={q.author}
-                  onError={(e) => { e.target.src = '/logos/mam.png'; }} />
-              </div>
+              <motion.div
+                className="quote-portrait"
+                initial={{ y: 60, opacity: 0, scale: 0.9 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -60, opacity: 0, scale: 0.9 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <img
+                  src={quotes[quoteIndex].image}
+                  alt={quotes[quoteIndex].author}
+                  onError={(e) => { e.target.src = '/logos/mam.png'; }}
+                  style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.3))' }}
+                />
+              </motion.div>
               <div className="quote-text-block">
-                <h2 className="main-quote" dangerouslySetInnerHTML={{ __html: `“${q.text}”` }}>
-                </h2>
-                <div className="quote-author">
-                  <span className="quote-author-name">-{q.author}</span>
-                  <span className="quote-author-title">{q.title}</span>
-                </div>
+                <motion.h2
+                  className="main-quote"
+                  dangerouslySetInnerHTML={{ __html: `“${quotes[quoteIndex].text}”` }}
+                  initial={{ y: 40, opacity: 0, filter: 'blur(10px)' }}
+                  animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                  exit={{ y: -20, opacity: 0, filter: 'blur(5px)' }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                />
+                <motion.div
+                  className="quote-author"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -10, opacity: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                >
+                  <span className="quote-author-name">-{quotes[quoteIndex].author}</span>
+                  <span className="quote-author-title">{quotes[quoteIndex].title}</span>
+                </motion.div>
               </div>
             </div>
-          </div>
-
-
-
-
-        ))}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Navigation Dots (Bottom Right) */}
         <div className="quote-pagination">
@@ -667,14 +916,51 @@ function App() {
       {/* Contact Section */}
       <section className="contact-section" id="contact">
         <div className="contact-container">
-          <div className="contact-left">
-            <h2>Let’s Connect</h2>
-            <p className="contact-subtitle">
+          <motion.div
+            className="contact-left"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: false, margin: "-100px" }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false }}
+              transition={{ duration: 0.6 }}
+            >
+              Let’s Connect
+            </motion.h2>
+            <motion.p
+              className="contact-subtitle"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
               Interested in collaboration, partnerships, or business opportunities? Feel free to reach out and start the conversation.
-            </p>
+            </motion.p>
 
-            <div className="contact-info-list">
-              <div className="contact-info-item">
+            <motion.div
+              className="contact-info-list"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: false }}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.2, delayChildren: 0.4 }
+                }
+              }}
+            >
+              <motion.div
+                className="contact-info-item"
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: { opacity: 1, x: 0 }
+                }}
+              >
                 <div className="contact-icon">
                   <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#0D3F80" strokeWidth="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 </div>
@@ -682,9 +968,15 @@ function App() {
                   <h3>Location</h3>
                   <p>No.4, 1st floor, Alamathi main road,<br />New vellanur, Avadi ,chennai - 600062.</p>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="contact-info-item">
+              <motion.div
+                className="contact-info-item"
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: { opacity: 1, x: 0 }
+                }}
+              >
                 <div className="contact-icon">
                   <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#0D3F80" strokeWidth="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><circle cx="18" cy="18" r="4" fill="white" stroke="#0D3F80"></circle><path d="M18 16v2.5l2 1" stroke="#0D3F80"></path></svg>
                 </div>
@@ -692,9 +984,15 @@ function App() {
                   <h3>Email Address</h3>
                   <p>connect@manvian.com</p>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="contact-info-item">
+              <motion.div
+                className="contact-info-item"
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: { opacity: 1, x: 0 }
+                }}
+              >
                 <div className="contact-icon">
                   <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#0D3F80" strokeWidth="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                 </div>
@@ -702,11 +1000,18 @@ function App() {
                   <h3>Phone</h3>
                   <p>+91 8778359643</p>
                 </div>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
 
-          <div className="contact-right">
+          <motion.div
+            className="contact-right"
+            initial={{ opacity: 0, scale: 0.9, rotateY: 10 }}
+            whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
+            viewport={{ once: false, margin: "-100px" }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            style={{ perspective: '1000px' }}
+          >
             <div className="form-box-container">
               {submitStatus === 'success' ? (
                 <div className="success-message">
@@ -792,14 +1097,18 @@ function App() {
                 </form>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Footer / Contact Hybrid Section */}
       <section className="footer-section" id="footer">
         <div className="footer-globe-bg">
-          <video
+          <motion.video
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false }}
+            transition={{ duration: 1.5 }}
             src="/logos/video.mp4"
             autoPlay
             loop
@@ -809,29 +1118,100 @@ function App() {
           />
         </div>
         <div className="footer-content">
-          <p className="have-idea">Have an Idea ?</p>
-          <h1>Let’s Make Something <br />Amazing Together.</h1>
-          <div className="footer-input-bar">
+          <motion.p
+            className="have-idea"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.8 }}
+          >
+            Have an Idea ?
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false }}
+            transition={{ duration: 1, delay: 0.2 }}
+          >
+            Let’s Make Something <br />Amazing Together.
+          </motion.h1>
+          <motion.div
+            className="footer-input-bar"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
             <input type="text" placeholder="Type Your Message Here.." />
-            <button className="contact-btn">Contact Me</button>
-          </div>
+            <motion.button
+              className="contact-btn"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Contact Me
+            </motion.button>
+          </motion.div>
         </div>
         <div className="footer-bottom-bar">
-          <p className="footer-copyright">© 2026 All rights reserved. | Designed & Developed By Manvian</p>
-          <div className="footer-socials">
-            <a href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2" target="_blank" rel="noreferrer" className="footer-social-circle">
+          <motion.p
+            className="footer-copyright"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+          >
+            © 2026 All rights reserved. | <br />
+            Designed & Developed By Manvian
+          </motion.p>
+          <motion.div
+            className="footer-socials"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1, delayChildren: 0.8 }
+              }
+            }}
+          >
+            <motion.a
+              variants={{
+                hidden: { opacity: 0, scale: 0.8, y: 20 },
+                visible: { opacity: 1, scale: 1, y: 0 }
+              }}
+              href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2" target="_blank" rel="noreferrer" className="footer-social-circle"
+            >
               <img src="/icons/instagram.png" alt="Instagram" />
-            </a>
-            <a href="mailto:connect@manvian.com" className="footer-social-circle">
+            </motion.a>
+            <motion.a
+              variants={{
+                hidden: { opacity: 0, scale: 0.8, y: 20 },
+                visible: { opacity: 1, scale: 1, y: 0 }
+              }}
+              href="mailto:connect@manvian.com" className="footer-social-circle"
+            >
               <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
-            </a>
-            <a href="https://wa.me/918778359643" target="_blank" rel="noreferrer" className="footer-social-circle">
+            </motion.a>
+            <motion.a
+              variants={{
+                hidden: { opacity: 0, scale: 0.8, y: 20 },
+                visible: { opacity: 1, scale: 1, y: 0 }
+              }}
+              href="https://wa.me/918778359643" target="_blank" rel="noreferrer" className="footer-social-circle"
+            >
               <img src="/icons/whatsapp.png" alt="WhatsApp" />
-            </a>
-            <a href="https://www.linkedin.com/in/hepsibah-catherine/" target="_blank" rel="noreferrer" className="footer-social-circle">
+            </motion.a>
+            <motion.a
+              variants={{
+                hidden: { opacity: 0, scale: 0.8, y: 20 },
+                visible: { opacity: 1, scale: 1, y: 0 }
+              }}
+              href="https://www.linkedin.com/in/hepsibah-catherine/" target="_blank" rel="noreferrer" className="footer-social-circle"
+            >
               <span className="linkedin-in" style={{ fontSize: '24px' }}>in</span>
-            </a>
-          </div>
+            </motion.a>
+          </motion.div>
         </div>
       </section>
     </div>
