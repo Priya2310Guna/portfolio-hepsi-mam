@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
-import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform, useMotionValue } from 'framer-motion';
 
 const CountUp = ({ end, duration = 2000, suffix = "" }) => {
   const [count, setCount] = React.useState(0);
@@ -364,6 +364,181 @@ const PremiumPortrait = ({ src }) => {
   );
 };
 
+const CustomCursor = ({ isSubmitting }) => {
+  const mouseX = useMotionValue(-100);
+  const mouseY = useMotionValue(-100);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const scrollTimeout = React.useRef(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+      if (!isVisible) setIsVisible(true);
+      
+      const target = e.target;
+      const isInteractive = target.closest('a, button, input, textarea, .pagination-dot, .nav-item, [role="button"]');
+      setIsHovering(!!isInteractive);
+    };
+
+    const handleScroll = () => {
+      setIsScrolling(true);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => setIsScrolling(false), 300);
+    };
+
+    const handleMouseLeave = () => setIsVisible(false);
+    const handleMouseEnter = () => setIsVisible(true);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('mouseenter', handleMouseEnter);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('mouseenter', handleMouseEnter);
+    };
+  }, [mouseX, mouseY, isVisible]);
+
+  const springConfig = { damping: 25, stiffness: 150 };
+  const pointSpringConfig = { damping: 30, stiffness: 400, mass: 0.2 };
+  
+  const cursorX = useSpring(mouseX, springConfig);
+  const cursorY = useSpring(mouseY, springConfig);
+  
+  const pointX = useSpring(mouseX, pointSpringConfig);
+  const pointY = useSpring(mouseY, pointSpringConfig);
+
+  const dot1X = useSpring(mouseX, { damping: 20, stiffness: 90, mass: 0.7 });
+  const dot1Y = useSpring(mouseY, { damping: 20, stiffness: 90, mass: 0.7 });
+  const dot2X = useSpring(mouseX, { damping: 25, stiffness: 80, mass: 0.9 });
+  const dot2Y = useSpring(mouseY, { damping: 25, stiffness: 80, mass: 0.9 });
+  const dot3X = useSpring(mouseX, { damping: 30, stiffness: 70, mass: 1.1 });
+  const dot3Y = useSpring(mouseY, { damping: 30, stiffness: 70, mass: 1.1 });
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  if (isMobile) return null;
+
+  return (
+    <div className={`custom-cursor-container ${isVisible ? 'visible' : ''} ${isHovering ? 'hovering' : ''}`}>
+      <motion.div
+        className="cursor-trail"
+        style={{
+          x: cursorX,
+          y: cursorY,
+          translateX: isScrolling ? -15 : isHovering ? -20 : -10,
+          translateY: isScrolling ? -25 : isHovering ? -20 : -10,
+        }}
+        animate={{
+          rotate: isScrolling ? 0 : isHovering ? 135 : 45,
+          borderRadius: isScrolling ? "20px" : isHovering ? "50%" : "4px",
+          width: isScrolling ? 30 : isHovering ? 40 : 20,
+          height: isScrolling ? 50 : isHovering ? 40 : 20,
+          backgroundColor: isScrolling ? 'rgba(13, 63, 128, 0.9)' : isHovering ? 'rgba(120, 175, 253, 0.15)' : 'rgba(13, 63, 128, 0.1)',
+          borderColor: isScrolling ? '#78AFFD' : isHovering ? '#78AFFD' : '#0D3F80',
+        }}
+      >
+        <AnimatePresence mode="wait">
+          {isSubmitting && (
+            <motion.span
+              key="loading"
+              initial={{ scale: 0, rotate: -45 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0 }}
+              className="cursor-inner-text"
+            >
+              🚀
+            </motion.span>
+          )}
+          {isScrolling && !isSubmitting && (
+            <motion.div
+              key="scroll"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              style={{
+                width: '2px',
+                height: '10px',
+                backgroundColor: '#78AFFD',
+                borderRadius: '2px',
+                position: 'relative'
+              }}
+            >
+              <motion.div
+                animate={{ y: [0, 6, 0] }}
+                transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  left: '-2px',
+                  top: '0'
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      <motion.div
+        className="cursor-dot-trail"
+        style={{ 
+          x: dot1X, 
+          y: dot1Y, 
+          translateX: -2, 
+          translateY: -2,
+          opacity: (isHovering || isScrolling) ? 0 : 0.6 
+        }}
+      />
+      <motion.div
+        className="cursor-dot-trail"
+        style={{ 
+          x: dot2X, 
+          y: dot2Y, 
+          translateX: -2, 
+          translateY: -2,
+          opacity: (isHovering || isScrolling) ? 0 : 0.4 
+        }}
+      />
+      <motion.div
+        className="cursor-dot-trail"
+        style={{ 
+          x: dot3X, 
+          y: dot3Y, 
+          translateX: -2, 
+          translateY: -2,
+          opacity: (isHovering || isScrolling) ? 0 : 0.2 
+        }}
+      />
+
+      <motion.div
+        className="cursor-point"
+        style={{ x: pointX, y: pointY, translateX: -2, translateY: -2 }}
+        animate={{
+          scale: isHovering ? 2.5 : 1,
+          backgroundColor: isHovering ? '#78AFFD' : '#0D3F80'
+        }}
+      />
+    </div>
+  );
+};
+
 function App() {
   // Testimonials Data
   const testimonials = [
@@ -412,27 +587,15 @@ function App() {
   const [errors, setErrors] = React.useState({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitStatus, setSubmitStatus] = React.useState(null);
-  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeout = React.useRef(null);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
-      setIsScrolling(true);
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-      scrollTimeout.current = setTimeout(() => setIsScrolling(false), 300);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -631,85 +794,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <div className="custom-cursor-container">
-        {/* Main Morphing Diamond/Circle */}
-        <motion.div
-          className="cursor-trail"
-          animate={{
-            x: mousePos.x - (isScrolling ? 15 : 10),
-            y: mousePos.y - (isScrolling ? 25 : 10),
-            rotate: isScrolling ? 0 : 45,
-            borderRadius: isScrolling ? "20px" : "4px",
-            width: isScrolling ? 30 : 20,
-            height: isScrolling ? 50 : 20,
-            backgroundColor: isScrolling ? 'rgba(13, 63, 128, 0.9)' : 'rgba(13, 63, 128, 0.1)',
-            borderColor: isScrolling ? '#78AFFD' : '#0D3F80',
-          }}
-          transition={{ type: 'spring', damping: 25, stiffness: 150 }}
-        >
-          <AnimatePresence>
-            {isSubmitting && (
-              <motion.span
-                key="loading"
-                initial={{ scale: 0, rotate: -45 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0 }}
-                className="cursor-inner-text"
-              >
-                🚀
-              </motion.span>
-            )}
-            {isScrolling && !isSubmitting && (
-              <motion.div
-                key="scroll"
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                style={{
-                  width: '2px',
-                  height: '10px',
-                  backgroundColor: '#78AFFD',
-                  borderRadius: '2px',
-                  position: 'relative'
-                }}
-              >
-                <motion.div
-                  animate={{ y: [0, 6, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '50%',
-                    position: 'absolute',
-                    left: '-2px',
-                    top: '0'
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Trailing Dots for motion feel */}
-        {[1, 2, 3].map((i) => (
-          <motion.div
-            key={i}
-            className="cursor-dot-trail"
-            animate={{
-              x: mousePos.x - 2,
-              y: mousePos.y - 2,
-            }}
-            transition={{ type: 'spring', damping: 15 + i * 5, stiffness: 100 - i * 10, mass: 0.5 + i * 0.2 }}
-          />
-        ))}
-
-        <motion.div
-          className="cursor-point"
-          animate={{ x: mousePos.x - 2, y: mousePos.y - 2 }}
-          transition={{ type: 'spring', damping: 30, stiffness: 400, mass: 0.2 }}
-        />
-      </div>
+      <CustomCursor isSubmitting={isSubmitting} />
       {/* Premium Scroll Progress Bar */}
       <div className="scroll-progress-container">
         <motion.div

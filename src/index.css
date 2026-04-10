@@ -96,6 +96,16 @@ body {
   left: 0;
   z-index: 10002;
   overflow: visible;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.custom-cursor-container.visible {
+  opacity: 1;
+}
+
+.custom-cursor-container.hovering .cursor-trail {
+  mix-blend-mode: difference;
 }
 
 .cursor-trail {
@@ -1083,7 +1093,8 @@ header .nav-links a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100 !important; /* Ensure it stays above orbital dots and rings */
+  z-index: 100 !important;
+  /* Ensure it stays above orbital dots and rings */
   box-shadow: 0 0 15px rgba(51, 102, 255, 0.6),
     0 0 30px rgba(51, 102, 255, 0.3);
   pointer-events: auto !important;
@@ -2956,7 +2967,8 @@ header .nav-links a:hover {
     transform: translate(-50%, -50%) !important;
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
     animation: floating-pill-mobile 6s ease-in-out infinite alternate !important;
-    z-index: 300 !important; /* Higher than title and testimonials */
+    z-index: 300 !important;
+    /* Higher than title and testimonials */
   }
 
   @keyframes floating-pill-mobile {
@@ -2997,11 +3009,13 @@ header .nav-links a:hover {
     width: 100% !important;
     margin: 0 !important;
     padding: 0 20px !important;
-    z-index: 40 !important; /* Lowered so it doesn't block logos */
+    z-index: 40 !important;
+    /* Lowered so it doesn't block logos */
     color: white !important;
     visibility: visible !important;
     opacity: 1 !important;
-    pointer-events: none !important; /* Allow clicks through the title area if it overlaps */
+    pointer-events: none !important;
+    /* Allow clicks through the title area if it overlaps */
   }
 
   .pill-text {
@@ -3694,4 +3708,66 @@ header .nav-links a:hover {
   background: #FF7300;
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(255, 115, 0, 0.6);
+}
+
+/* Media query for Laptop screens and Tablet Landscape (resolves overlapping in the image) */
+@media screen and (max-width: 1400px) {
+
+  .header-container,
+  .hero-container {
+    padding: 0 60px !important;
+    /* Reduces side padding to give more room */
+  }
+
+  .hero-title {
+    font-size: 80px !important;
+    /* Scales down the massive 96px header */
+    line-height: 1.1 !important;
+    width: 580px !important;
+    /* Shrinks the text block width */
+    margin-bottom: 20px !important;
+  }
+
+  .main-portrait img {
+    width: 520px !important;
+    /* Scales down portrait to prevent overlap */
+  }
+
+  .hero-blue-arc {
+    width: 260px !important;
+    height: 520px !important;
+    right: 60px !important;
+  }
+
+  .hero-quote {
+    font-size: 22px !important;
+    max-width: 500px !important;
+  }
+}
+
+/* Further refinement for smaller laptops and iPad Pro */
+@media screen and (max-width: 1100px) {
+  .hero-left {
+    width: 60% !important;
+  }
+
+  .hero-right {
+    width: 40% !important;
+  }
+
+  .hero-title {
+    font-size: 64px !important;
+    width: 100% !important;
+  }
+
+  .main-portrait img {
+    width: 440px !important;
+    right: -20px !important;
+  }
+
+  .hero-blue-arc {
+    width: 220px !important;
+    height: 440px !important;
+    right: 40px !important;
+  }
 }
