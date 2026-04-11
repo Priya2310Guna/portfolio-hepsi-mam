@@ -1911,6 +1911,7 @@ header .nav-links a:hover {
 .contact-text-link {
   text-decoration: none;
   display: block;
+  color: inherit;
 }
 
 .contact-text-link:hover h3 {

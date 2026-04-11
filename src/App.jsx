@@ -1617,8 +1617,11 @@ function App() {
                 }
               }}
             >
-              <motion.div
-                className="contact-info-item"
+              <motion.a
+                href="https://www.google.com/maps/search/?api=1&query=No.4,+1st+floor,+Alamathi+main+road,+New+vellanur,+Avadi,+chennai+-+600062"
+                target="_blank"
+                rel="noreferrer"
+                className="contact-info-item contact-text-link"
                 variants={{
                   hidden: { opacity: 0, x: -20 },
                   visible: { opacity: 1, x: 0 }
@@ -1631,10 +1634,11 @@ function App() {
                   <h3>Location</h3>
                   <p>No.4, 1st floor, Alamathi main road,<br />New vellanur, Avadi ,chennai - 600062.</p>
                 </div>
-              </motion.div>
+              </motion.a>
 
-              <motion.div
-                className="contact-info-item"
+              <motion.a
+                href="mailto:connect@manvian.com"
+                className="contact-info-item contact-text-link"
                 variants={{
                   hidden: { opacity: 0, x: -20 },
                   visible: { opacity: 1, x: 0 }
@@ -1647,10 +1651,11 @@ function App() {
                   <h3>Email Address</h3>
                   <p>connect@manvian.com</p>
                 </div>
-              </motion.div>
+              </motion.a>
 
-              <motion.div
-                className="contact-info-item"
+              <motion.a
+                href="tel:+918778359643"
+                className="contact-info-item contact-text-link"
                 variants={{
                   hidden: { opacity: 0, x: -20 },
                   visible: { opacity: 1, x: 0 }
@@ -1663,7 +1668,7 @@ function App() {
                   <h3>Phone</h3>
                   <p>+91 8778359643</p>
                 </div>
-              </motion.div>
+              </motion.a>
             </motion.div>
           </motion.div>
 
