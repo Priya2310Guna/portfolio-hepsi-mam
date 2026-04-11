@@ -2551,7 +2551,7 @@ header .nav-links a:hover {
   position: relative;
   z-index: 20;
   top: 535px;
-  border-top: 1px solid rgba(255, 255, 255, 0.934);
+  border-top: 1.5px solid rgba(255, 255, 255, 1);
 }
 
 .footer-copyright {
@@ -3544,7 +3544,7 @@ header .nav-links a:hover {
     gap: 15px !important;
     align-items: center !important;
     margin: 0 auto !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
     width: 84% !important;
     height: auto !important;
     background: transparent !important;
