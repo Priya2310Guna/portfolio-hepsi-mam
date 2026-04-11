@@ -1898,12 +1898,36 @@ header .nav-links a:hover {
   font-weight: 600;
   color: #333333;
   margin-bottom: 4px;
+  transition: color 0.3s ease;
 }
 
 .contact-text p {
   font-size: 16px;
   line-height: 24px;
   color: #666666;
+  transition: color 0.3s ease;
+}
+
+.contact-text-link {
+  text-decoration: none;
+  display: block;
+}
+
+.contact-text-link:hover h3 {
+  color: #0D3F80;
+}
+
+.contact-text-link:hover p {
+  color: #333333;
+}
+
+.contact-info-item:hover .contact-icon svg {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+.contact-icon svg {
+  transition: transform 0.3s ease;
 }
 
 .contact-right {
@@ -2519,13 +2543,13 @@ header .nav-links a:hover {
 .footer-bottom-bar {
   width: 100%;
   height: 10px;
-  padding: 10px 120px;
+  padding: 44px 55px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
   z-index: 20;
-  margin-top: auto;
+  top: 535px;
   border-top: 1px solid rgba(255, 255, 255, 0.934);
 }
 
@@ -2865,7 +2889,7 @@ header .nav-links a:hover {
     justify-content: center !important;
     position: relative !important;
     flex-shrink: 0 !important;
-    margin-top: -34px !important;
+    margin-top: -33px !important;
   }
 
   .hero-blue-arc {
@@ -2882,7 +2906,7 @@ header .nav-links a:hover {
     height: 520px !important;
     width: auto !important;
     right: auto !important;
-    left: 64% !important;
+    left: 62% !important;
     transform: translateX(-50%) !important;
     bottom: 0 !important;
     position: absolute !important;
@@ -3513,9 +3537,10 @@ header .nav-links a:hover {
 
   .footer-bottom-bar {
     padding: 0 24px !important;
+    top: 10px;
     /* Centered with 84% width as requested */
     flex-direction: column-reverse !important;
-    gap: 45px !important;
+    gap: 15px !important;
     align-items: center !important;
     margin: 0 auto !important;
     border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
