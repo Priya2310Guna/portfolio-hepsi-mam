@@ -2374,21 +2374,22 @@ header .nav-links a:hover {
   position: absolute;
   width: 100%;
   height: 100%;
-  bottom: -10%;
+  bottom: -14%;
   left: -20px;
   z-index: 1;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
+  align-items: center;
+  pointer-events: none;
 }
 
-.footer-globe-bg img {
+.footer-globe-bg .background-video {
   width: 100%;
-  max-width: 1600px;
   height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  opacity: 0.9;
+  object-fit: contain;
+  opacity: 0.5;
+  filter: brightness(0.8);
+  transform: translateY(20px);
 }
 
 .footer-content {
@@ -2403,11 +2404,11 @@ header .nav-links a:hover {
 }
 
 .have-idea {
-  margin-top: -126px;
+  margin-top: -176px;
 }
 
 .footer-content {
-  font-size: 34px;
+  font-size: 36px;
   font-weight: 400;
   color: white;
   margin-bottom: -124px;
@@ -3486,26 +3487,26 @@ header .nav-links a:hover {
   }
 
   .footer-globe-bg {
-    display: block !important;
+    display: flex !important;
     position: absolute !important;
     width: 100% !important;
     height: 100% !important;
-    top: 0 !important;
-    left: 0 !important;
-    overflow: hidden !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    justify-content: center !important;
+    align-items: center !important;
     z-index: 0 !important;
+    overflow: hidden !important;
   }
 
-  .footer-globe-bg video,
   .footer-globe-bg .background-video {
-    position: absolute !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center center !important;
+    width: 180% !important;
+    /* Scale up for mobile to fill edges */
+    height: auto !important;
+    max-width: none !important;
+    object-fit: contain !important;
     opacity: 0.35 !important;
-    top: 0 !important;
-    left: 0 !important;
   }
 
   .footer-content,
@@ -3711,7 +3712,7 @@ header .nav-links a:hover {
 }
 
 /* Media query for Laptop screens and Tablet Landscape (resolves overlapping in the image) */
-@media screen and (max-width: 1400px) {
+@media screen and (max-width: 1380px) {
 
   .header-container,
   .hero-container {
@@ -3762,12 +3763,12 @@ header .nav-links a:hover {
 
   .main-portrait img {
     width: 440px !important;
-    right: -20px !important;
+    right: 20px !important;
   }
 
   .hero-blue-arc {
-    width: 220px !important;
+    width: 240px !important;
     height: 440px !important;
-    right: 40px !important;
+    right: 80px !important;
   }
 }

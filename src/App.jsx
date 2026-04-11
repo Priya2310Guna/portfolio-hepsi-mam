@@ -377,7 +377,7 @@ const CustomCursor = ({ isSubmitting }) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
       if (!isVisible) setIsVisible(true);
-      
+
       const target = e.target;
       const isInteractive = target.closest('a, button, input, textarea, .pagination-dot, .nav-item, [role="button"]');
       setIsHovering(!!isInteractive);
@@ -407,10 +407,10 @@ const CustomCursor = ({ isSubmitting }) => {
 
   const springConfig = { damping: 25, stiffness: 150 };
   const pointSpringConfig = { damping: 30, stiffness: 400, mass: 0.2 };
-  
+
   const cursorX = useSpring(mouseX, springConfig);
   const cursorY = useSpring(mouseY, springConfig);
-  
+
   const pointX = useSpring(mouseX, pointSpringConfig);
   const pointY = useSpring(mouseY, pointSpringConfig);
 
@@ -498,32 +498,32 @@ const CustomCursor = ({ isSubmitting }) => {
 
       <motion.div
         className="cursor-dot-trail"
-        style={{ 
-          x: dot1X, 
-          y: dot1Y, 
-          translateX: -2, 
+        style={{
+          x: dot1X,
+          y: dot1Y,
+          translateX: -2,
           translateY: -2,
-          opacity: (isHovering || isScrolling) ? 0 : 0.6 
+          opacity: (isHovering || isScrolling) ? 0 : 0.6
         }}
       />
       <motion.div
         className="cursor-dot-trail"
-        style={{ 
-          x: dot2X, 
-          y: dot2Y, 
-          translateX: -2, 
+        style={{
+          x: dot2X,
+          y: dot2Y,
+          translateX: -2,
           translateY: -2,
-          opacity: (isHovering || isScrolling) ? 0 : 0.4 
+          opacity: (isHovering || isScrolling) ? 0 : 0.4
         }}
       />
       <motion.div
         className="cursor-dot-trail"
-        style={{ 
-          x: dot3X, 
-          y: dot3Y, 
-          translateX: -2, 
+        style={{
+          x: dot3X,
+          y: dot3Y,
+          translateX: -2,
           translateY: -2,
-          opacity: (isHovering || isScrolling) ? 0 : 0.2 
+          opacity: (isHovering || isScrolling) ? 0 : 0.2
         }}
       />
 
@@ -888,10 +888,10 @@ function App() {
           <div className="hero-right">
             <div
               className="hero-blue-arc"
-              style={{ 
-                transformOrigin: 'bottom', 
-                height: 'var(--hero-arc-height)', 
-                width: 'var(--hero-arc-width)', 
+              style={{
+                transformOrigin: 'bottom',
+                height: 'var(--hero-arc-height)',
+                width: 'var(--hero-arc-width)',
                 overflow: 'hidden',
                 boxShadow: "0 0 20px rgba(13, 57, 138, 0.2)"
               }}
