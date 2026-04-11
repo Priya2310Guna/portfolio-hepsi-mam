@@ -2519,7 +2519,7 @@ header .nav-links a:hover {
 .footer-bottom-bar {
   width: 100%;
   height: 10px;
-  padding: 50px 120px;
+  padding: 10px 120px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2616,6 +2616,67 @@ header .nav-links a:hover {
 }
 
 /* MEDIA QUERIES FOR PHONE VIEW */
+@media screen and (max-width: 1380px) {
+
+  .header-container,
+  .hero-container {
+    padding: 0 60px !important;
+    /* Reduces side padding to give more room */
+  }
+
+  .hero-title {
+    font-size: 80px !important;
+    /* Scales down the massive 96px header */
+    line-height: 1.1 !important;
+    width: 580px !important;
+    /* Shrinks the text block width */
+    margin-bottom: 20px !important;
+  }
+
+  .main-portrait img {
+    width: 520px !important;
+    /* Scales down portrait to prevent overlap */
+  }
+
+  .hero-blue-arc {
+    width: 260px !important;
+    height: 520px !important;
+    right: 60px !important;
+  }
+
+  .hero-quote {
+    font-size: 22px !important;
+    max-width: 500px !important;
+  }
+}
+
+/* Further refinement for smaller laptops and iPad Pro */
+@media screen and (max-width: 1100px) {
+  .hero-left {
+    width: 60% !important;
+  }
+
+  .hero-right {
+    width: 40% !important;
+  }
+
+  .hero-title {
+    font-size: 64px !important;
+    width: 100% !important;
+  }
+
+  .main-portrait img {
+    width: 440px !important;
+    right: 20px !important;
+  }
+
+  .hero-blue-arc {
+    width: 240px !important;
+    height: 440px !important;
+    right: 80px !important;
+  }
+}
+
 @media screen and (max-width: 768px) {
   :root {
     --hero-arc-width: 280px;
@@ -2750,26 +2811,49 @@ header .nav-links a:hover {
 
   .hero-left {
     width: 100% !important;
-    margin-bottom: 30px !important;
-    text-align: left !important;
-    align-items: flex-start !important;
-    padding-top: 30px !important;
+    margin-bottom: 40px !important;
+    text-align: center !important;
+    align-items: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-top: 40px !important;
   }
 
   .hero-hello {
-    font-size: 16px !important;
+    font-size: 20px !important;
+    margin-bottom: 15px !important;
+    text-align: center !important;
+    justify-content: center !important;
+    display: flex !important;
+    width: 100% !important;
   }
 
   .hero-title {
-    font-size: 44px !important;
+    font-size: clamp(38px, 10vw, 48px) !important;
     line-height: 1.1 !important;
     width: 100% !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 25px !important;
+    letter-spacing: -0.5px !important;
+    text-align: center !important;
+    align-items: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .hero-title>span {
+    justify-content: center !important;
+    width: 100% !important;
   }
 
   .hero-quote {
-    font-size: 18px !important;
-    max-width: 100% !important;
+    font-size: 20px !important;
+    max-width: 90% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    line-height: 1.4 !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
   }
 
   .hero-right {
@@ -2781,7 +2865,7 @@ header .nav-links a:hover {
     justify-content: center !important;
     position: relative !important;
     flex-shrink: 0 !important;
-    margin-top: 20px !important;
+    margin-top: -34px !important;
   }
 
   .hero-blue-arc {
@@ -3428,7 +3512,7 @@ header .nav-links a:hover {
   }
 
   .footer-bottom-bar {
-    padding: 0 24px 60px !important;
+    padding: 0 24px !important;
     /* Centered with 84% width as requested */
     flex-direction: column-reverse !important;
     gap: 45px !important;
@@ -3491,7 +3575,7 @@ header .nav-links a:hover {
     position: absolute !important;
     width: 100% !important;
     height: 100% !important;
-    top: 50% !important;
+    top: 60% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     justify-content: center !important;
@@ -3712,63 +3796,3 @@ header .nav-links a:hover {
 }
 
 /* Media query for Laptop screens and Tablet Landscape (resolves overlapping in the image) */
-@media screen and (max-width: 1380px) {
-
-  .header-container,
-  .hero-container {
-    padding: 0 60px !important;
-    /* Reduces side padding to give more room */
-  }
-
-  .hero-title {
-    font-size: 80px !important;
-    /* Scales down the massive 96px header */
-    line-height: 1.1 !important;
-    width: 580px !important;
-    /* Shrinks the text block width */
-    margin-bottom: 20px !important;
-  }
-
-  .main-portrait img {
-    width: 520px !important;
-    /* Scales down portrait to prevent overlap */
-  }
-
-  .hero-blue-arc {
-    width: 260px !important;
-    height: 520px !important;
-    right: 60px !important;
-  }
-
-  .hero-quote {
-    font-size: 22px !important;
-    max-width: 500px !important;
-  }
-}
-
-/* Further refinement for smaller laptops and iPad Pro */
-@media screen and (max-width: 1100px) {
-  .hero-left {
-    width: 60% !important;
-  }
-
-  .hero-right {
-    width: 40% !important;
-  }
-
-  .hero-title {
-    font-size: 64px !important;
-    width: 100% !important;
-  }
-
-  .main-portrait img {
-    width: 440px !important;
-    right: 20px !important;
-  }
-
-  .hero-blue-arc {
-    width: 240px !important;
-    height: 440px !important;
-    right: 80px !important;
-  }
-}
