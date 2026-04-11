@@ -497,7 +497,7 @@ header .nav-links a:hover {
   height: 750px;
   width: auto;
   bottom: 0;
-  right: -50px;
+  right: -119px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -613,7 +613,7 @@ header .nav-links a:hover {
   font-weight: 500;
   color: #FFFFFF;
   line-height: 1;
-  letter-spacing: 0;
+  letter-spacing: -1px;
   text-shadow: 0 0 15px rgba(120, 175, 253, 0.4);
 }
 
@@ -2397,10 +2397,10 @@ header .nav-links a:hover {
 
 .footer-globe-bg {
   position: absolute;
-  width: 100%;
+  width: 112%;
   height: 100%;
-  bottom: -14%;
-  left: -20px;
+  bottom: -12%;
+  left: -57px;
   z-index: 1;
   display: flex;
   justify-content: center;
@@ -2664,9 +2664,9 @@ header .nav-links a:hover {
   }
 
   .hero-blue-arc {
-    width: 260px !important;
+    width: 323px !important;
     height: 520px !important;
-    right: 60px !important;
+    right: 77px !important;
   }
 
   .hero-quote {
@@ -2890,7 +2890,7 @@ header .nav-links a:hover {
     justify-content: center !important;
     position: relative !important;
     flex-shrink: 0 !important;
-    margin-top: -33px !important;
+    margin-top: -62px !important;
   }
 
   .hero-blue-arc {
@@ -3443,7 +3443,7 @@ header .nav-links a:hover {
     width: 100% !important;
     font-weight: 700 !important;
     color: white !important;
-    letter-spacing: -0.5px !important;
+    letter-spacing: -1.5px !important;
   }
 
   .footer-input-bar {
@@ -3538,7 +3538,7 @@ header .nav-links a:hover {
 
   .footer-bottom-bar {
     padding: 0 24px !important;
-    top: 10px;
+    top: -5px;
     /* Centered with 84% width as requested */
     flex-direction: column-reverse !important;
     gap: 15px !important;
@@ -3599,9 +3599,9 @@ header .nav-links a:hover {
   .footer-globe-bg {
     display: flex !important;
     position: absolute !important;
-    width: 100% !important;
+    width: 117% !important;
     height: 100% !important;
-    top: 60% !important;
+    top: 59% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     justify-content: center !important;
@@ -3822,3 +3822,74 @@ header .nav-links a:hover {
 }
 
 /* Media query for Laptop screens and Tablet Landscape (resolves overlapping in the image) */
+@media screen and (min-width: 1381px) and (max-width: 1600px) {
+
+  .header-container,
+  .hero-container {
+    max-width: 1440px !important;
+    padding: 0 80px !important;
+  }
+
+  .hero-left {
+    width: 58% !important;
+  }
+
+  .hero-right {
+    width: 42% !important;
+  }
+
+  .hero-title {
+    font-size: 82px !important;
+    line-height: 100px !important;
+    width: 620px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .hero-quote {
+    font-size: 24px !important;
+    max-width: 550px !important;
+  }
+
+  .main-portrait img {
+    width: 550px !important;
+    height: auto !important;
+  }
+
+  .hero-blue-arc {
+    width: 323px !important;
+    height: 550px !important;
+    right: 77px !important;
+  }
+
+  .vertical-social-bar {
+    right: 20px !important;
+    gap: 15px !important;
+  }
+
+  .social-pill {
+    width: 55px !important;
+    height: 55px !important;
+  }
+
+  .stats-bar-navy {
+    padding: 0 60px !important;
+    height: 180px !important;
+    margin-top: -60px !important;
+  }
+
+  .stat-box-navy .sn-num {
+    font-size: 60px !important;
+  }
+
+  .stat-box-navy .sn-text {
+    font-size: 20px !important;
+  }
+
+  header {
+    height: 80px !important;
+  }
+
+  .header-container {
+    padding: 0 80px !important;
+  }
+}
