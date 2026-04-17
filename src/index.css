@@ -84,78 +84,9 @@ body {
   background-color: var(--bg-color);
   color: var(--text-dark);
   overflow-x: hidden;
-  cursor: none;
-  /* Hide default cursor */
 }
 
-/* Geometric Morphing Custom Cursor */
-.custom-cursor-container {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10002;
-  overflow: visible;
-  opacity: 0;
-  transition: opacity 0.3s ease-out;
-}
 
-.custom-cursor-container.visible {
-  opacity: 1;
-}
-
-.custom-cursor-container.hovering .cursor-trail {
-  mix-blend-mode: difference;
-}
-
-.cursor-trail {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--primary-blue);
-  background: rgba(13, 63, 128, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.cursor-point {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background-color: var(--primary-blue);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 20;
-}
-
-.cursor-dot-trail {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background-color: rgba(13, 63, 128, 0.3);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.cursor-inner-text {
-  font-size: 20px;
-  display: block;
-}
-
-/* Ensure all interactive elements also hide the native cursor */
-a,
-button,
-input,
-textarea,
-.pagination-dot,
-.nav-item,
-[role="button"] {
-  cursor: none !important;
-}
 
 .app-container {
   width: 100%;
@@ -441,6 +372,18 @@ header .nav-links a:hover {
 .hero-hello .name {
   color: var(--primary-blue);
   font-weight: 700;
+  text-shadow: 0 0 10px rgba(13, 63, 128, 0.2);
+  animation: logo-text-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes logo-text-glow {
+  from {
+    text-shadow: 0 0 5px rgba(13, 63, 128, 0.2);
+  }
+
+  to {
+    text-shadow: 0 0 15px rgba(13, 63, 128, 0.5), 0 0 25px rgba(13, 63, 128, 0.2);
+  }
 }
 
 .hero-title {
@@ -510,14 +453,14 @@ header .nav-links a:hover {
 }
 
 .vertical-social-bar {
-  position: absolute;
-  right: 10px;
-  top: 61%;
+  position: fixed;
+  right: 20px;
+  top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   gap: 20px;
-  z-index: 10;
+  z-index: 9999;
 }
 
 .social-pill {
@@ -528,10 +471,11 @@ header .nav-links a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(13, 63, 128, 0.15);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
+  border: 1.5px solid rgba(13, 63, 128, 0.08);
 }
 
 .social-pill:hover {
@@ -781,7 +725,10 @@ header .nav-links a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.08),
+    0 10px 20px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(13, 63, 128, 0.05);
   position: relative;
@@ -808,8 +755,10 @@ header .nav-links a:hover {
 
 .info-card:hover {
   transform: translateY(-20px) scale(1.02);
-  box-shadow: 0 40px 80px rgba(13, 63, 128, 0.12);
-  border-color: rgba(13, 63, 128, 0.2);
+  box-shadow: 
+    0 50px 100px rgba(13, 63, 128, 0.2), 
+    0 15px 40px rgba(13, 63, 128, 0.1);
+  border-color: rgba(13, 63, 128, 0.3);
 }
 
 .info-card:hover::after {
@@ -1387,10 +1336,11 @@ header .nav-links a:hover {
 .testimonial-stack {
   position: relative;
   width: 900px;
-  height: 450px;
+  height: 480px;
   display: flex;
   justify-content: center;
   align-items: center;
+  perspective: 1200px;
 }
 
 .testimonial-card-v2 {
@@ -1399,11 +1349,13 @@ header .nav-links a:hover {
   max-width: 820px;
   height: 400px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, transparent 50%),
     linear-gradient(145deg, #f0f7ff 0%, #e0edff 100%);
   border: 1.5px solid rgba(13, 63, 128, 0.15);
   border-radius: 32px;
   padding: 60px 80px;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 
   /* High-end Multi-layered Shadow System */
   box-shadow:
@@ -1416,6 +1368,7 @@ header .nav-links a:hover {
   flex-direction: column;
   justify-content: space-between;
   text-align: left;
+  transform-origin: center center;
 }
 
 /* Base style for the inner content */
@@ -1473,11 +1426,6 @@ header .nav-links a:hover {
   color: #3b82f6;
   /* Vibrant Blue */
   margin: 2px 0 0;
-}
-
-/* Removing old CSS transitions as we transition to Framer Motion for better control */
-.testimonial-card-v2 {
-  transform-origin: center center;
 }
 
 /* Navigation Buttons */
@@ -2383,38 +2331,38 @@ header .nav-links a:hover {
 
 .footer-section {
   width: 100%;
-  background: #000814;
+  background: #01040a;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 180px 0 0 0;
+  padding: 140px 0 0 0;
   overflow: hidden;
-  min-height: 850px;
+  min-height: 100vh;
   z-index: 2000;
 }
 
 .footer-globe-bg {
   position: absolute;
-  width: 112%;
-  height: 100%;
-  bottom: -12%;
-  left: -57px;
+  width: 140%;
+  height: auto;
+  top: 29%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   pointer-events: none;
+  opacity: 0.9;
 }
 
 .footer-globe-bg .background-video {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
-  opacity: 0.5;
-  filter: brightness(0.8);
-  transform: translateY(20px);
+  filter: brightness(1.0) contrast(1.2) saturate(1.2);
 }
 
 .footer-content {
@@ -2422,46 +2370,58 @@ header .nav-links a:hover {
   z-index: 10;
   text-align: center;
   width: 100%;
-  max-width: 1200px;
+  bottom: 110px;
+  max-width: 1300px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0;
 }
 
 .have-idea {
-  margin-top: -176px;
+  font-size: 18px;
+  font-weight: 500;
+  color: white;
+  margin-bottom: 25px;
+  letter-spacing: 0.5px;
+  animation: footer-ambient-float 4s ease-in-out infinite alternate;
 }
 
-.footer-content {
-  font-size: 36px;
-  font-weight: 400;
-  color: white;
-  margin-bottom: -124px;
-  letter-spacing: 1px;
+@keyframes footer-ambient-float {
+  from { transform: translateY(0); opacity: 0.8; }
+  to { transform: translateY(-5px); opacity: 1; }
 }
 
 .footer-content h1 {
-  font-size: clamp(32px, 5vw, 56px);
+  font-size: 72px;
   font-weight: 700;
-  color: white;
-  margin-bottom: 30px;
+  margin: 0 0 80px;
   line-height: 1.1;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
+  background: linear-gradient(90deg, #FFFFFF, #78AFFD, #FFFFFF, #78AFFD, #FFFFFF);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: footer-text-shimmer 5s linear infinite;
+}
+
+@keyframes footer-text-shimmer {
+  0% { background-position: 0% center; }
+  100% { background-position: -200% center; }
 }
 
 .footer-input-bar {
   display: flex;
-  background: rgba(217, 217, 217, 0.95);
-  backdrop-filter: blur(10px);
+  background: #D9D9D9;
+  /* Matching image light grey */
   border-radius: 12px;
-  width: 700px;
-  margin: 60px auto 0;
+  width: 850px;
+  max-width: 90%;
+  margin: 0 auto;
   padding: 8px;
   align-items: center;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: bar-ambient-pulse 4s ease-in-out infinite alternate;
 }
 
 @keyframes bar-ambient-pulse {
@@ -2485,16 +2445,16 @@ header .nav-links a:hover {
   flex: 1;
   background: transparent;
   border: none;
-  padding: 20px 30px;
+  padding: 16px 25px;
   font-size: 20px;
-  color: #333333;
+  color: #1a1a1a;
+  font-weight: 500;
   outline: none;
 }
 
 .footer-input-bar input::placeholder {
-  color: #555555;
+  color: #666666;
   font-weight: 500;
-  transition: all 0.3s ease;
 }
 
 .footer-input-bar input:focus::placeholder {
@@ -2503,37 +2463,20 @@ header .nav-links a:hover {
 }
 
 .footer-input-bar .contact-btn {
-  background: #0D3F80;
+  background: #02387B;
+  /* Deeper professional blue */
   color: white;
   border: none;
-  padding: 18px 50px;
+  padding: 16px 40px;
   border-radius: 10px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 4px 15px rgba(13, 63, 128, 0.2);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.footer-input-bar .contact-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent);
-  transition: 0.5s;
-}
-
-.footer-input-bar .contact-btn:hover::before {
-  left: 100%;
-}
+/* Shine effect removed as per request */
 
 .footer-input-bar .contact-btn:hover {
   background: #06254D;
@@ -2543,21 +2486,29 @@ header .nav-links a:hover {
 
 .footer-bottom-bar {
   width: 100%;
-  height: 10px;
-  padding: 44px 55px;
+  margin-top: auto;
+  padding: 10px 100px 25px;
+  /* Minimal top padding for tight alignment with separator line */
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
   z-index: 20;
-  top: 535px;
-  border-top: 1.5px solid rgba(255, 255, 255, 1);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
 }
 
 .footer-copyright {
-  color: #DEDEDE;
-  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
   font-weight: 400;
+  letter-spacing: 0.5px;
+  animation: copyright-fade 6s ease-in-out infinite alternate;
+}
+
+@keyframes copyright-fade {
+  0% { color: rgba(255, 255, 255, 0.6); }
+  100% { color: rgba(255, 255, 255, 0.9); }
 }
 
 .footer-socials {
@@ -2588,10 +2539,19 @@ header .nav-links a:hover {
 
 .footer-social-circle svg,
 .footer-social-circle span {
-  width: 32px;
-  height: 32px;
-  color: var(--primary-blue);
-  fill: var(--primary-blue);
+  width: 28px;
+  height: 28px;
+  color: #02387B;
+  fill: #02387B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-social-circle img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 .logo-text {
@@ -2923,19 +2883,9 @@ header .nav-links a:hover {
     object-fit: contain !important;
   }
 
-  .vertical-social-bar {
-    position: relative !important;
-    top: auto !important;
-    right: auto !important;
-    transform: none !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    gap: 15px !important;
-    margin-top: 30px !important;
-    margin-bottom: 20px !important;
-    padding: 0 !important;
-    width: 100% !important;
-    z-index: 100 !important;
+  .vertical-social-bar,
+  .social-sidebar {
+    display: none !important;
   }
 
   .social-pill {
@@ -3442,8 +3392,8 @@ header .nav-links a:hover {
     margin-bottom: 40px !important;
     width: 100% !important;
     font-weight: 700 !important;
-    color: white !important;
     letter-spacing: -1.5px !important;
+    color: transparent !important; /* Allow background gradient to show */
   }
 
   .footer-input-bar {
@@ -3517,24 +3467,7 @@ header .nav-links a:hover {
     transform: scale(0.95) !important;
   }
 
-  .footer-input-bar .contact-btn::after {
-    content: '' !important;
-    position: absolute !important;
-    top: -50% !important;
-    left: -60% !important;
-    width: 20% !important;
-    height: 200% !important;
-    background: rgba(255, 255, 255, 0.2) !important;
-    transform: rotate(30deg) !important;
-    transition: none !important;
-    opacity: 0 !important;
-  }
-
-  .footer-input-bar .contact-btn:hover::after {
-    left: 120% !important;
-    opacity: 1 !important;
-    transition: all 0.6s ease-in-out !important;
-  }
+/* Mobile shine effect removed */
 
   .footer-bottom-bar {
     padding: 0 24px !important;

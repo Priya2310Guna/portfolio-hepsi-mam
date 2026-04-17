@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
-import { motion, AnimatePresence, useScroll, useSpring, useTransform, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform, useInView } from 'framer-motion';
 
 const CountUp = ({ end, duration = 2000, suffix = "" }) => {
   const [count, setCount] = React.useState(0);
@@ -93,7 +93,62 @@ const PremiumText = ({ text, delay = 0, className = "" }) => {
                   position: 'relative'
                 }}
               >
-                {char}
+                {char === 'i' ? (
+                  <span style={{ position: 'relative', display: 'inline-block' }}>
+                    {/* Stem part (bottom 70%) */}
+                    <span style={{
+                      display: 'inline-block',
+                      clipPath: 'inset(28% 0 0 0)',
+                      opacity: 1
+                    }}>
+                      {char}
+                    </span>
+                    {/* Dot part (top 30%) */}
+                    <motion.span
+                      initial={{ x: -150, y: 0, rotate: -720, opacity: 0 }}
+                      whileInView={{
+                        x: 0,
+                        rotate: 0,
+                        y: [0, -30, 0, -15, 0],
+                        opacity: 1
+                      }}
+                      viewport={{ once: false }}
+                      transition={{
+                        x: {
+                          duration: 0.8,
+                          ease: "easeOut",
+                          delay: delay + (wordIndex * 0.08) + (charIndex * 0.04) + 0.8
+                        },
+                        rotate: {
+                          duration: 0.8,
+                          ease: "easeOut",
+                          delay: delay + (wordIndex * 0.08) + (charIndex * 0.04) + 0.8
+                        },
+                        y: {
+                          duration: 1.2,
+                          times: [0, 0.4, 0.6, 0.8, 1],
+                          ease: "easeOut",
+                          delay: delay + (wordIndex * 0.08) + (charIndex * 0.04) + 1.6 // Start after rolling sequence
+                        },
+                        opacity: {
+                          duration: 0.3,
+                          delay: delay + (wordIndex * 0.08) + (charIndex * 0.04) + 0.8
+                        }
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        clipPath: 'inset(0 0 72% 0)',
+                        display: 'inline-block',
+                        transformOrigin: 'center 15%' // Rotate around the dot area
+                      }}
+                    >
+                      {char}
+                    </motion.span>
+                  </span>
+                ) : char}
               </motion.span>
             </span>
           ))}
@@ -349,7 +404,13 @@ const SplitSlideText = ({ text, delay = 0 }) => {
 
 const PremiumPortrait = ({ src }) => {
   return (
-    <div style={{ position: 'relative', width: 'var(--hero-portrait-width)', height: 'var(--hero-portrait-height)' }}>
+    <motion.div
+      initial={{ y: 200, opacity: 0 }}
+      whileInView={{ y: 0, opacity: 1 }}
+      viewport={{ once: false }}
+      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+      style={{ position: 'relative', width: 'var(--hero-portrait-width)', height: 'var(--hero-portrait-height)' }}
+    >
       <div style={{ width: '100%', height: '100%' }}>
         <img
           src={src}
@@ -360,184 +421,11 @@ const PremiumPortrait = ({ src }) => {
           }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 };
 
-const CustomCursor = ({ isSubmitting }) => {
-  const mouseX = useMotionValue(-100);
-  const mouseY = useMotionValue(-100);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const scrollTimeout = React.useRef(null);
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-      if (!isVisible) setIsVisible(true);
-
-      const target = e.target;
-      const isInteractive = target.closest('a, button, input, textarea, .pagination-dot, .nav-item, [role="button"]');
-      setIsHovering(!!isInteractive);
-    };
-
-    const handleScroll = () => {
-      setIsScrolling(true);
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-      scrollTimeout.current = setTimeout(() => setIsScrolling(false), 300);
-    };
-
-    const handleMouseLeave = () => setIsVisible(false);
-    const handleMouseEnter = () => setIsVisible(true);
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('mouseenter', handleMouseEnter);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-      window.removeEventListener('mouseenter', handleMouseEnter);
-    };
-  }, [mouseX, mouseY, isVisible]);
-
-  const springConfig = { damping: 25, stiffness: 150 };
-  const pointSpringConfig = { damping: 30, stiffness: 400, mass: 0.2 };
-
-  const cursorX = useSpring(mouseX, springConfig);
-  const cursorY = useSpring(mouseY, springConfig);
-
-  const pointX = useSpring(mouseX, pointSpringConfig);
-  const pointY = useSpring(mouseY, pointSpringConfig);
-
-  const dot1X = useSpring(mouseX, { damping: 20, stiffness: 90, mass: 0.7 });
-  const dot1Y = useSpring(mouseY, { damping: 20, stiffness: 90, mass: 0.7 });
-  const dot2X = useSpring(mouseX, { damping: 25, stiffness: 80, mass: 0.9 });
-  const dot2Y = useSpring(mouseY, { damping: 25, stiffness: 80, mass: 0.9 });
-  const dot3X = useSpring(mouseX, { damping: 30, stiffness: 70, mass: 1.1 });
-  const dot3Y = useSpring(mouseY, { damping: 30, stiffness: 70, mass: 1.1 });
-
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  if (isMobile) return null;
-
-  return (
-    <div className={`custom-cursor-container ${isVisible ? 'visible' : ''} ${isHovering ? 'hovering' : ''}`}>
-      <motion.div
-        className="cursor-trail"
-        style={{
-          x: cursorX,
-          y: cursorY,
-          translateX: isScrolling ? -15 : isHovering ? -20 : -10,
-          translateY: isScrolling ? -25 : isHovering ? -20 : -10,
-        }}
-        animate={{
-          rotate: isScrolling ? 0 : isHovering ? 135 : 45,
-          borderRadius: isScrolling ? "20px" : isHovering ? "50%" : "4px",
-          width: isScrolling ? 30 : isHovering ? 40 : 20,
-          height: isScrolling ? 50 : isHovering ? 40 : 20,
-          backgroundColor: isScrolling ? 'rgba(13, 63, 128, 0.9)' : isHovering ? 'rgba(120, 175, 253, 0.15)' : 'rgba(13, 63, 128, 0.1)',
-          borderColor: isScrolling ? '#78AFFD' : isHovering ? '#78AFFD' : '#0D3F80',
-        }}
-      >
-        <AnimatePresence mode="wait">
-          {isSubmitting && (
-            <motion.span
-              key="loading"
-              initial={{ scale: 0, rotate: -45 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0 }}
-              className="cursor-inner-text"
-            >
-              🚀
-            </motion.span>
-          )}
-          {isScrolling && !isSubmitting && (
-            <motion.div
-              key="scroll"
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              style={{
-                width: '2px',
-                height: '10px',
-                backgroundColor: '#78AFFD',
-                borderRadius: '2px',
-                position: 'relative'
-              }}
-            >
-              <motion.div
-                animate={{ y: [0, 6, 0] }}
-                transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-                style={{
-                  width: '6px',
-                  height: '6px',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '50%',
-                  position: 'absolute',
-                  left: '-2px',
-                  top: '0'
-                }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      <motion.div
-        className="cursor-dot-trail"
-        style={{
-          x: dot1X,
-          y: dot1Y,
-          translateX: -2,
-          translateY: -2,
-          opacity: (isHovering || isScrolling) ? 0 : 0.6
-        }}
-      />
-      <motion.div
-        className="cursor-dot-trail"
-        style={{
-          x: dot2X,
-          y: dot2Y,
-          translateX: -2,
-          translateY: -2,
-          opacity: (isHovering || isScrolling) ? 0 : 0.4
-        }}
-      />
-      <motion.div
-        className="cursor-dot-trail"
-        style={{
-          x: dot3X,
-          y: dot3Y,
-          translateX: -2,
-          translateY: -2,
-          opacity: (isHovering || isScrolling) ? 0 : 0.2
-        }}
-      />
-
-      <motion.div
-        className="cursor-point"
-        style={{ x: pointX, y: pointY, translateX: -2, translateY: -2 }}
-        animate={{
-          scale: isHovering ? 2.5 : 1,
-          backgroundColor: isHovering ? '#78AFFD' : '#0D3F80'
-        }}
-      />
-    </div>
-  );
-};
 
 function App() {
   // Testimonials Data
@@ -748,37 +636,58 @@ function App() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
 
+  const [isAnimating, setIsAnimating] = useState(false);
+
   const nextSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     setDirection(1);
     setActiveIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const prevSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     setDirection(-1);
     setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
   const variants = {
     enter: (direction) => ({
-      x: direction > 0 ? 150 : -150,
+      x: direction > 0 ? "120%" : "-120%",
+      y: "-120%",
+      scale: 0.9,
+      rotate: direction > 0 ? 8 : -8,
       opacity: 0,
-      scale: 0.95,
-      rotate: direction > 0 ? 5 : -5
+      zIndex: 6
     }),
     center: {
-      zIndex: 10,
       x: 0,
-      opacity: 1,
+      y: 0,
       scale: 1,
-      rotate: 0
+      rotate: 0,
+      opacity: 1,
+      zIndex: 5,
+      transition: {
+        x: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+        y: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+        scale: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+        rotate: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+        opacity: { duration: 0.75, ease: [0.22, 1, 0.36, 1] }
+      }
     },
-    exit: (direction) => ({
-      zIndex: 0,
-      x: direction < 0 ? 150 : -150,
+    exit: {
+      x: 0,
+      y: 40,
+      scale: 0.85,
       opacity: 0,
-      scale: 0.95,
-      rotate: direction < 0 ? 5 : -5
-    })
+      zIndex: 4,
+      transition: {
+        y: { duration: 0.4, ease: [0.4, 0, 1, 1] },
+        scale: { duration: 0.4, ease: [0.4, 0, 1, 1] },
+        opacity: { duration: 0.4, ease: [0.4, 0, 1, 1] }
+      }
+    }
   };
 
   const { scrollYProgress } = useScroll();
@@ -791,10 +700,11 @@ function App() {
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, 100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
   const globeScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.2]);
+  const footerRef = React.useRef(null);
+  const isFooterInView = useInView(footerRef, { amount: 0.1 });
 
   return (
     <div className="app-container">
-      <CustomCursor isSubmitting={isSubmitting} />
       {/* Premium Scroll Progress Bar */}
       <div className="scroll-progress-container">
         <motion.div
@@ -860,6 +770,97 @@ function App() {
         </div>
       </header>
 
+      {/* Social Bar - Moved to top for global visibility */}
+      <motion.div
+        className="vertical-social-bar"
+        initial="hidden"
+        animate={isFooterInView ? "hidden" : "visible"}
+        variants={{
+          hidden: { opacity: 0, x: 20, pointerEvents: "none" },
+          visible: {
+            opacity: 1,
+            x: 0,
+            pointerEvents: "auto",
+            transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+          }
+        }}
+      >
+        {/* Instagram */}
+        <motion.a
+          href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2"
+          target="_blank"
+          rel="noreferrer"
+          className="social-pill"
+          variants={{
+            hidden: { x: 50, opacity: 0, rotateY: 45 },
+            visible: { x: 0, opacity: 1, rotateY: 0 }
+          }}
+          whileHover={{
+            scale: 1.15,
+            rotateY: 10,
+            boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
+            backgroundColor: "#F0F7FF"
+          }}
+        >
+          <img src="/icons/instagram.png" alt="Instagram" />
+        </motion.a>
+        {/* Email */}
+        <motion.a
+          href="mailto:connect@manvian.com"
+          className="social-pill"
+          variants={{
+            hidden: { x: 50, opacity: 0, rotateY: 45 },
+            visible: { x: 0, opacity: 1, rotateY: 0 }
+          }}
+          whileHover={{
+            scale: 1.15,
+            rotateY: 10,
+            boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
+            backgroundColor: "#F0F7FF"
+          }}
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
+        </motion.a>
+        {/* WhatsApp */}
+        <motion.a
+          href="https://wa.me/918778359643"
+          target="_blank"
+          rel="noreferrer"
+          className="social-pill"
+          variants={{
+            hidden: { x: 50, opacity: 0, rotateY: 45 },
+            visible: { x: 0, opacity: 1, rotateY: 0 }
+          }}
+          whileHover={{
+            scale: 1.15,
+            rotateY: 10,
+            boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
+            backgroundColor: "#F0F7FF"
+          }}
+        >
+          <img src="/icons/whatsapp.png" alt="WhatsApp" />
+        </motion.a>
+        {/* LinkedIn */}
+        <motion.a
+          href="https://www.linkedin.com/in/hepsibah-catherine/"
+          target="_blank"
+          rel="noreferrer"
+          className="social-pill"
+          variants={{
+            hidden: { x: 50, opacity: 0, rotateY: 45 },
+            visible: { x: 0, opacity: 1, rotateY: 0 }
+          }}
+          whileHover={{
+            scale: 1.15,
+            rotateY: 10,
+            boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
+            backgroundColor: "#F0F7FF"
+          }}
+        >
+          <span className="linkedin-in" style={{ fontSize: '24px' }}>in</span>
+        </motion.a>
+      </motion.div>
+
       {/* Hero Section */}
       <main className="hero">
         <div className="hero-container" style={{ perspective: '1000px' }}>
@@ -886,8 +887,12 @@ function App() {
           </motion.div>
 
           <div className="hero-right">
-            <div
+            <motion.div
               className="hero-blue-arc"
+              initial={{ x: -300, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              viewport={{ once: false }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
               style={{
                 transformOrigin: 'bottom',
                 height: 'var(--hero-arc-height)',
@@ -896,103 +901,17 @@ function App() {
                 boxShadow: "0 0 20px rgba(13, 57, 138, 0.2)"
               }}
             >
-            </div>
+            </motion.div>
             <div
               className="main-portrait"
             >
               <PremiumPortrait src="/logos/mam.png" />
             </div>
           </div>
-          {/* Social Bar - moved outside hero-right so it can flow below portrait on mobile */}
-          <motion.div
-            className="vertical-social-bar"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.2, delayChildren: 0.5 }
-              }
-            }}
-          >
-            {/* Instagram */}
-            <motion.a
-              href="https://www.instagram.com/hepsibah_catherine?igsh=Y2R3YXF3bTh3MXJ2"
-              target="_blank"
-              rel="noreferrer"
-              className="social-pill"
-              variants={{
-                hidden: { x: 50, opacity: 0, rotateY: 45 },
-                visible: { x: 0, opacity: 1, rotateY: 0 }
-              }}
-              whileHover={{
-                scale: 1.15,
-                rotateY: 10,
-                boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
-                backgroundColor: "#F0F7FF"
-              }}
-            >
-              <img src="/icons/instagram.png" alt="Instagram" />
-            </motion.a>
-            {/* Email */}
-            <motion.a
-              href="mailto:connect@manvian.com"
-              className="social-pill"
-              variants={{
-                hidden: { x: 50, opacity: 0, rotateY: 45 },
-                visible: { x: 0, opacity: 1, rotateY: 0 }
-              }}
-              whileHover={{
-                scale: 1.15,
-                rotateY: 10,
-                boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
-                backgroundColor: "#F0F7FF"
-              }}
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
-            </motion.a>
-            {/* WhatsApp */}
-            <motion.a
-              href="https://wa.me/918778359643"
-              target="_blank"
-              rel="noreferrer"
-              className="social-pill"
-              variants={{
-                hidden: { x: 50, opacity: 0, rotateY: 45 },
-                visible: { x: 0, opacity: 1, rotateY: 0 }
-              }}
-              whileHover={{
-                scale: 1.15,
-                rotateY: 10,
-                boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
-                backgroundColor: "#F0F7FF"
-              }}
-            >
-              <img src="/icons/whatsapp.png" alt="WhatsApp" />
-            </motion.a>
-            {/* LinkedIn */}
-            <motion.a
-              href="https://www.linkedin.com/in/hepsibah-catherine/"
-              target="_blank"
-              rel="noreferrer"
-              className="social-pill"
-              variants={{
-                hidden: { x: 50, opacity: 0, rotateY: 45 },
-                visible: { x: 0, opacity: 1, rotateY: 0 }
-              }}
-              whileHover={{
-                scale: 1.15,
-                rotateY: 10,
-                boxShadow: "0 0 25px rgba(13, 63, 128, 0.4), 0 0 50px rgba(13, 63, 128, 0.2)",
-                backgroundColor: "#F0F7FF"
-              }}
-            >
-              <span className="linkedin-in" style={{ fontSize: '24px' }}>in</span>
-            </motion.a>
-          </motion.div>
         </div>
       </main>
+
+
 
       {/* Stats Bar */}
       <section className="stats-bar-navy">
@@ -1183,6 +1102,7 @@ function App() {
             </div>
             <div className="card-decoration" />
           </motion.div>
+
         </div>
       </section>
 
@@ -1431,34 +1351,16 @@ function App() {
           </button>
 
           <div className="testimonial-stack">
-            <AnimatePresence initial={false} custom={direction}>
+            <AnimatePresence initial={false} custom={direction} onExitComplete={() => setIsAnimating(false)}>
               {/* Main Active Card */}
               <motion.div
                 key={activeIndex}
                 custom={direction}
                 variants={variants}
                 initial="enter"
-                animate={{
-                  ...variants.center,
-                  y: [0, -8, 0]
-                }}
+                animate="center"
                 exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.4 },
-                  scale: { duration: 0.4 },
-                  y: {
-                    repeat: Infinity,
-                    duration: 4,
-                    ease: "easeInOut"
-                  }
-                }}
                 className="testimonial-card-v2 active"
-                whileHover={{
-                  scale: 1.02,
-                  boxShadow: "0 25px 50px rgba(13, 63, 128, 0.15)",
-                  translateY: -5
-                }}
               >
                 <div className="card-inner">
                   <p className="quote-text">“{testimonials[activeIndex].quote}”</p>
@@ -1473,28 +1375,6 @@ function App() {
                   </div>
                 </div>
               </motion.div>
-
-              {/* Stacked Card 1 (Behind) */}
-              <motion.div
-                key={`bg-1-${activeIndex}`}
-                initial={{ opacity: 0, scale: 0.9, y: -30 }}
-                animate={{ opacity: 0.6, scale: 0.96, y: -15 }}
-                exit={{ opacity: 0, scale: 0.9, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="testimonial-card-v2 background-card-1"
-                style={{ zIndex: 5, pointerEvents: 'none', filter: 'blur(3px)' }}
-              />
-
-              {/* Stacked Card 2 (Further Back) */}
-              <motion.div
-                key={`bg-2-${activeIndex}`}
-                initial={{ opacity: 0, scale: 0.85, y: -50 }}
-                animate={{ opacity: 0.3, scale: 0.92, y: -30 }}
-                exit={{ opacity: 0, scale: 0.85, y: -15 }}
-                transition={{ duration: 0.6 }}
-                className="testimonial-card-v2 background-card-2"
-                style={{ zIndex: 1, pointerEvents: 'none', filter: 'blur(6px)' }}
-              />
             </AnimatePresence>
           </div>
 
@@ -1864,7 +1744,7 @@ function App() {
       </section>
 
       {/* Footer / Contact Hybrid Section */}
-      <section className="footer-section" id="footer">
+      <section className="footer-section" id="footer" ref={footerRef}>
         <div className="footer-globe-bg">
           <motion.video
             initial={{ opacity: 0 }}
